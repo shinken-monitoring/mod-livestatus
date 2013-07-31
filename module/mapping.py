@@ -1724,7 +1724,7 @@ livestatus_attribute_map = {
         },
         'host_notification_period': {
             'description': 'The time period in which the contact will be notified about host problems',
-            'function': lambda item, req: item.host_notification_period.get_name(),
+            'function': lambda item, req: item.host_notification_period,
         },
         'host_notifications_enabled': {
             'description': 'Whether the contact will be notified about host problems in general (0/1)',
@@ -1761,7 +1761,7 @@ livestatus_attribute_map = {
         },
         'service_notification_period': {
             'description': 'The time period in which the contact will be notified about service problems',
-            'function': lambda item, req: item.service_notification_period.get_name(),
+            'function': lambda item, req: item.service_notification_period,
         },
         'service_notifications_enabled': {
             'description': 'Whether the contact will be notified about service problems in general (0/1)',
@@ -3565,7 +3565,7 @@ livestatus_attribute_map = {
         },
         'interval_length': {
             'description': 'The default interval length from nagios.cfg',
-            'function': lambda item, req: item.interval_length,  # REPAIRME
+            'function': lambda item, req: item.interval_length,
             'datatype': int,
         },
         'last_command_check': {
