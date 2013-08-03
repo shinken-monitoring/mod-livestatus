@@ -1,4 +1,4 @@
-from shinken_test import *
+from shinken_modules import *
 import os
 import sys
 import re
@@ -13,7 +13,7 @@ sys.path.append('../shinken/modules')
 from shinken.comment import Comment
 
 
-class TestConfig(ShinkenTest):
+class TestConfig(ShinkenModulesTest):
     def contains_line(self, text, pattern):
         regex = re.compile(pattern)
         for line in text.splitlines():

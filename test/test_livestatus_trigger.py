@@ -25,7 +25,7 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_test import *
+from shinken_modules import *
 import os
 import re
 import subprocess
@@ -46,7 +46,7 @@ time_hacker.set_real_time()
 
 
 
-class TestConfig(ShinkenTest):
+class TestConfig(ShinkenModulesTest):
     def contains_line(self, text, pattern):
         regex = re.compile(pattern)
         for line in text.splitlines():

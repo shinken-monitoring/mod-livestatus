@@ -25,7 +25,7 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_test import *
+from shinken_modules import *
 import os
 import re
 import subprocess

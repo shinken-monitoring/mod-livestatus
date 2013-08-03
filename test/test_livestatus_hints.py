@@ -20,7 +20,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-from shinken_test import *
+from shinken_modules import *
 import os
 import re
 import subprocess
@@ -37,7 +37,7 @@ from shinken.comment import Comment
 sys.setcheckinterval(10000)
 
 
-class PerfTst(ShinkenTest):
+class PerfTst(ShinkenModulesTest):
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
@@ -54,7 +54,7 @@ class PerfTst(ShinkenTest):
         self.sched.broks = {}
 
 
-class TestConfigBig(ShinkenTest):
+class TestConfigBig(ShinkenModulesTest):
     def setUp(self):
         print "comment me for performance tests"
         self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
