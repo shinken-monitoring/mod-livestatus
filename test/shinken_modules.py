@@ -4,7 +4,7 @@
 from shinken_test import *
 #
 
-modulesctx.set_modulesdir(modulesdir)
+modulesctx.set_modulesdir(modules_dir)
 
 # Special Livestatus module opening since the module rename
 #from shinken.modules.livestatus import module as livestatus_broker
