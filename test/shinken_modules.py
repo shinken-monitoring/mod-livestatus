@@ -79,7 +79,7 @@ class ShinkenModulesTest(ShinkenTest):
         # this seems to damage the logger so that the scheduler can't use it
         #self.livestatus_broker.log.load_obj(self.livestatus_broker)
         self.livestatus_broker.debug_output = []
-        self.livestatus_broker.modules_manager = ModulesManager('livestatus', modulesdir, [])
+        self.livestatus_broker.modules_manager = ModulesManager('livestatus', modules_dir, [])
         self.livestatus_broker.modules_manager.set_modules(self.livestatus_broker.modules)
         # We can now output some previouly silented debug ouput
         self.livestatus_broker.do_load_modules()
