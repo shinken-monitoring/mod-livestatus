@@ -161,7 +161,7 @@ class LiveStatusQuery(object):
                     _, attribute, operator, reference = self.split_option(line, 3)
                 except:
                     _, attribute, operator, reference = self.split_option(line, 2) + ['']
-                if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
+                if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=', '!=~', '!~', '!~~']:
                     # Cut off the table name
                     attribute = self.strip_table_from_column(attribute)
                     # Some operators can simply be negated
@@ -221,7 +221,7 @@ class LiveStatusQuery(object):
                         attribute, operator = operator, attribute
                     reference = ''
                 attribute = self.strip_table_from_column(attribute)
-                if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
+                if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=', '!=~', '!~', '!~~']:
                     if operator in ['!>', '!>=', '!<', '!<=']:
                         operator = {'!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>'}[operator]
                     self.filtercolumns.append(attribute)
