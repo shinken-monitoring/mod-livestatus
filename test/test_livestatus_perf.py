@@ -1282,7 +1282,7 @@ class PerfTest(ShinkenTest):
 class TestConfigBig(PerfTest):
     def setUp(self):
         print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_10r_1000h_20000s.cfg')
+        self.setup_with_file('etc/shinken_10r_1000h_20000s.cfg')
         # ...test_router_09
         # ...test_host_0999
         self.testid = str(os.getpid() + random.randint(1, 1000))
@@ -1315,7 +1315,7 @@ class TestConfigBig(PerfTest):
 ## class TestConfigCrazy(PerfTest):
 ##     def setUp(self):
 ##         print "comment me for performance tests"
-##         self.setup_with_file('etc/nagios_50r_5000h_100000s.cfg')
+##         self.setup_with_file('etc/shinken_50r_5000h_100000s.cfg')
 ##         # ...test_router_49
 ##         # ...test_host_4999
 ##         self.testid = str(os.getpid() + random.randint(1, 1000))

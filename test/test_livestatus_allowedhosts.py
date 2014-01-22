@@ -41,7 +41,7 @@ time_hacker.set_real_time()
 
 class TestConfigAuth(TestConfig):
     def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
 

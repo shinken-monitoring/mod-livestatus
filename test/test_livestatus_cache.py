@@ -45,7 +45,7 @@ class TestConfigBig(TestConfig):
     def setUp(self):
 
         start_setUp = time.time()
-        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
+        self.setup_with_file('etc/shinken_5r_100h_2000s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus(needcache=True)

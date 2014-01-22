@@ -134,11 +134,11 @@ class TestConfig(ShinkenModulesTest):
     # We assume that there is a nagios_1r_1h_1s.cfg and a nagios_1r_1h_1s directory for the objects
     def unshinkenize_config(self, configname):
         new_configname = configname + '_' + str(os.getpid())
-        config = open('etc/nagios_' + configname + '.cfg')
+        config = open('etc/shinken_' + configname + '.cfg')
         text = config.readlines()
         config.close()
 
-        newconfig = open('etc/nagios_' + new_configname + '.cfg', 'w')
+        newconfig = open('etc/shinken_' + new_configname + '.cfg', 'w')
         for line in text:
             if re.search('^resource_file=', line):
                 newconfig.write("resource_file=etc/resource.cfg\n")
@@ -203,7 +203,7 @@ class TestConfig(ShinkenModulesTest):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
             os.remove('var/status.dat')
-        self.nagios_proc = subprocess.Popen([self.nagios_path, 'etc/nagios_' + self.nagios_config + '.cfg'], close_fds=True)
+        self.nagios_proc = subprocess.Popen([self.nagios_path, 'etc/shinken_' + self.nagios_config + '.cfg'], close_fds=True)
         self.nagios_started = time.time()
         time.sleep(2)
 
@@ -221,8 +221,8 @@ class TestConfig(ShinkenModulesTest):
                     self.nagios_proc.kill()
                 if os.path.exists('etc/' + self.nagios_config):
                     shutil.rmtree('etc/' + self.nagios_config)
-                if os.path.exists('etc/nagios_' + self.nagios_config + '.cfg'):
-                    os.remove('etc/nagios_' + self.nagios_config + '.cfg')
+                if os.path.exists('etc/shinken_' + self.nagios_config + '.cfg'):
+                    os.remove('etc/shinken_' + self.nagios_config + '.cfg')
 
     def ask_nagios(self, request):
         if time.time() - self.nagios_started < 2:
@@ -275,7 +275,7 @@ class TestConfig(ShinkenModulesTest):
 
 class TestConfigSmall(TestConfig):
     def setUp(self):
-        self.setup_with_file('etc/nagios_1r_1h_1s.cfg')
+        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
@@ -2534,7 +2534,7 @@ Columns: description host_name display_name"""
 class TestConfigBig(TestConfig):
     def setUp(self):
         start_setUp = time.time()
-        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
+        self.setup_with_file('etc/shinken_5r_100h_2000s.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
@@ -3716,7 +3716,7 @@ Columns: description host_name display_name"""
 
 class TestConfigComplex(TestConfig):
     def setUp(self):
-        self.setup_with_file('etc/nagios_problem_impact.cfg')
+        self.setup_with_file('etc/shinken_problem_impact.cfg')
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
         print "Cleaning old broks?"

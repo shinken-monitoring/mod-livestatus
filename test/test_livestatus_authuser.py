@@ -46,7 +46,7 @@ sys.setcheckinterval(10000)
 
 class TestConfigAuth(TestConfig):
     def setUp(self):
-        self.setup_with_file('etc/nagios_livestatus_authuser.cfg')
+        self.setup_with_file('etc/shinken_livestatus_authuser.cfg')
         Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()

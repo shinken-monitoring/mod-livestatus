@@ -57,7 +57,7 @@ class PerfTst(ShinkenModulesTest):
 class TestConfigBig(ShinkenModulesTest):
     def setUp(self):
         print "comment me for performance tests"
-        self.setup_with_file('etc/nagios_5r_100h_2000s.cfg')
+        self.setup_with_file('etc/shinken_5r_100h_2000s.cfg')
         # ...test_router_09
         # ...test_host_0999
         self.testid = str(os.getpid() + random.randint(1, 1000))
