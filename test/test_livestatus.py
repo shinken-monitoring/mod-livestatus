@@ -161,7 +161,7 @@ class TestConfig(ShinkenModulesTest):
             elif re.search('^status_update_interval=', line):
                 newconfig.write("status_update_interval=30\n")
             elif re.search('^command_file=', line):
-                newconfig.write("command_file=var/nagios.cmd\n")
+                newconfig.write("command_file=var/shinken.cmd\n")
             elif re.search('^command_check_interval=', line):
                 newconfig.write("command_check_interval=1s\n")
             else:
@@ -197,8 +197,8 @@ class TestConfig(ShinkenModulesTest):
             if not os.path.exists(dir):
                 os.mkdir(dir)
         self.nagios_config = self.unshinkenize_config(config)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
+        if os.path.exists('var/shinken.log'):
+            os.remove('var/shinken.log')
         if os.path.exists('var/retention.dat'):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
@@ -258,7 +258,7 @@ class TestConfig(ShinkenModulesTest):
                 buffer.write(cmd)
         buffer.close()
         print "open pipe", self.conf.command_file
-        fifo = open('var/nagios.cmd', 'w')
+        fifo = open('var/shinken.cmd', 'w')
         cmd = "[%lu] PROCESS_FILE;%s;0\n" % (now, 'var/pipebuffer')
         fifo.write(cmd)
         fifo.flush()
@@ -266,7 +266,7 @@ class TestConfig(ShinkenModulesTest):
         time.sleep(5)
 
     def nagios_extcmd(self, cmd):
-        fifo = open('var/nagios.cmd', 'w')
+        fifo = open('var/shinken.cmd', 'w')
         fifo.write(cmd)
         fifo.flush()
         fifo.close()
@@ -302,8 +302,8 @@ class TestConfigSmall(TestConfig):
             os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
+        if os.path.exists('var/shinken.log'):
+            os.remove('var/shinken.log')
         if os.path.exists('var/retention.dat'):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
@@ -2092,7 +2092,7 @@ ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(response == """200          78
-test_host_0;test_ok_0;/nagios/pnp/index.php?host=$HOSTNAME$&srv=$SERVICEDESC$
+test_host_0;test_ok_0;/shinken/pnp/index.php?host=$HOSTNAME$&srv=$SERVICEDESC$
 """)
 
         request = """GET services
@@ -2105,7 +2105,7 @@ ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(response == """200          75
-test_host_0;test_ok_0;/nagios/pnp/index.php?host=test_host_0&srv=test_ok_0
+test_host_0;test_ok_0;/shinken/pnp/index.php?host=test_host_0&srv=test_ok_0
 """)
 
         request = """GET services
@@ -2131,7 +2131,7 @@ ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(response == """200          66
-test_host_0;test_ok_0;/nagios/wiki/doku.php/test_host_0/test_ok_0
+test_host_0;test_ok_0;/shinken/wiki/doku.php/test_host_0/test_ok_0
 """)
 
         request = """GET hosts
@@ -2143,7 +2143,7 @@ ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(response == """200          51
-test_host_0;/nagios/pnp/index.php?host=test_host_0
+test_host_0;/shinken/pnp/index.php?host=test_host_0
 """)
 
         request = """GET hosts
@@ -2167,7 +2167,7 @@ ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         self.assert_(response == """200          46
-test_host_0;/nagios/wiki/doku.php/test_host_0
+test_host_0;/shinken/wiki/doku.php/test_host_0
 """)
 
     def test_thruk_action_notes_url_icon_image_complicated(self):
@@ -2560,8 +2560,8 @@ class TestConfigBig(TestConfig):
             os.remove(self.livelogs + "-journal")
         if os.path.exists(self.livestatus_broker.pnp_path):
             shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
+        if os.path.exists('var/shinken.log'):
+            os.remove('var/shinken.log')
         if os.path.exists('var/retention.dat'):
             os.remove('var/retention.dat')
         if os.path.exists('var/status.dat'):
