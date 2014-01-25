@@ -2091,7 +2091,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          78
+        self.assert_(response == """200          79
 test_host_0;test_ok_0;/shinken/pnp/index.php?host=$HOSTNAME$&srv=$SERVICEDESC$
 """)
 
@@ -2104,7 +2104,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          75
+        self.assert_(response == """200          76
 test_host_0;test_ok_0;/shinken/pnp/index.php?host=test_host_0&srv=test_ok_0
 """)
 
@@ -2130,7 +2130,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          66
+        self.assert_(response == """200          67
 test_host_0;test_ok_0;/shinken/wiki/doku.php/test_host_0/test_ok_0
 """)
 
@@ -2142,7 +2142,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          51
+        self.assert_(response == """200          52
 test_host_0;/shinken/pnp/index.php?host=test_host_0
 """)
 
@@ -2166,7 +2166,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          46
+        self.assert_(response == """200          47
 test_host_0;/shinken/wiki/doku.php/test_host_0
 """)
 
