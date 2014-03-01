@@ -1,7 +1,7 @@
 {
   "name": "livestatus",
   "types": ["module"],
-  "version": "1.4",
+  "version": "1.0",
   "homepage": "http://github.com/shinken-monitoring/mod-livestatus",
   "author": "Jean Gabès",
   "description": "Livestatus module for shinken",
@@ -14,7 +14,9 @@
   "repository": "https://github.com/shinken-monitoring/mod-livestatus",
   "keywords": [
     "module",
-    "broker"
+    "broker",
+    "livestatus",
+    "LQL",
   ],
   "dependencies": {
     "shinken": ">=1.4"
