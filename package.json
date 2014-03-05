@@ -16,7 +16,7 @@
     "module",
     "broker",
     "livestatus",
-    "LQL",
+    "LQL"
   ],
   "dependencies": {
     "shinken": ">=1.4"
