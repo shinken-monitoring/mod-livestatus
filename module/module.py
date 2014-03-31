@@ -502,7 +502,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 output, keepalive = response.respond()
                                 try:
                                     s.send(output)
-                                    self.write_protocol('', output)
+                                    self.write_protocol(response=output)
                                 except Exception, e:
                                     pass
                                 open_connections[socketid]['buffer'] = None
@@ -523,7 +523,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                                     output, keepalive = response.respond()
                                     try:
                                         s.send(output)
-                                        self.write_protocol('', output)
+                                        self.write_protocol(response=output)
                                     except Exception, e:
                                         pass
                                     open_connections[socketid]['buffer'] = None
@@ -654,11 +654,13 @@ class LiveStatus_broker(BaseModule, Daemon):
 
                         if handle_it:
                             open_connections[socketid]['buffer'] = open_connections[socketid]['buffer'].rstrip()
+                            # Better print request when we have it. Easier to find a big query
+                            self.write_protocol(request=open_connections[socketid]['buffer'])
                             response, keepalive = self.livestatus.handle_request(open_connections[socketid]['buffer'])
                             if isinstance(response, str):
                                 try:
                                     s.send(response)
-                                    self.write_protocol(open_connections[socketid]['buffer'], response)
+                                    self.write_protocol(response=response)
                                 except:
                                     # Maybe the request was an external command and
                                     # the peer is not interested in a response at all
@@ -672,7 +674,6 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 else:
                                     open_connections[socketid]['state'] = 'idle'
                             else:
-                                self.write_protocol(open_connections[socketid]['buffer'], "not yet")
                                 # Complicated. A trigger is involved
                                 wait, query = response
                                 open_connections[socketid]['buffer'] = None
@@ -717,7 +718,9 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         self.do_stop()
 
-    def write_protocol(self, request, response):
+    def write_protocol(self, request=None, response=None):
         if self.debug_queries:
-            print "REQUEST>>>>>\n" + request + "\n\n"
-            #print "RESPONSE<<<<\n" + response + "\n\n"
+            if request is not None:
+                print "REQUEST>>>>>\n" + request + "\n\n"
+            if response is not None:
+                print "RESPONSE<<<<\n" + response + "\n\n"
