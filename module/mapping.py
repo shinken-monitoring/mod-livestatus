@@ -1528,7 +1528,7 @@ livestatus_attribute_map = {
         },
         'num_services': {
             'description': 'The total number of services of hosts in this group',
-            'function': lambda item, req: lambda x: sum((len(x.services) for x in item.members)),
+            'function': lambda item, req: sum((len(x.services) for x in item.members)),
         },
         'num_services_crit': {
             'description': 'The total number of services with the state CRIT of hosts in this group',
