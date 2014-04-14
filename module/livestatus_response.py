@@ -81,6 +81,10 @@ class LiveStatusResponse:
         return self.output, self.keepalive
 
     def format_live_data(self, result, columns, aliases):
+        """
+        Format output to the specified format. Default csv
+
+        """
         if self.query.stats_query:
             return self.format_live_data_stats(result, columns, aliases)
         lines = []
