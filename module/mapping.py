@@ -455,7 +455,7 @@ livestatus_attribute_map = {
         },
         'last_hard_state': {
             'description': 'Last hard state',
-            'function': lambda item, req: item.last_hard_state,
+            'function': lambda item, req: item.last_hard_state_id,
             'datatype': int,
         },
         'last_hard_state_change': {
