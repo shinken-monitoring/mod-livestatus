@@ -2505,7 +2505,7 @@ Limit: 1001"""
         request = 'GET downtimes\nColumns: host_name service_description id comment\n'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == 'test_host_0;test_ok_0;1;blablub\n')
+        self.assert_(re.search('test_host_0;test_ok_0;[0-9]+;blablub\n', response) is not None)
 
     def test_display_name(self):
         self.print_header()
