@@ -49,24 +49,7 @@ class TestConfigAuth(TestConfig):
         # stop thread
         self.livestatus_broker.interrupted = True
         self.lql_thread.join()
-        # /
-
-        self.stop_nagios()
-        #self.livestatus_broker.db.commit()
-        #self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
+        super(TestConfig, self).tearDown()
 
     def init_livestatus(self, conf):
         super(TestConfigAuth, self).init_livestatus(conf)

@@ -64,23 +64,6 @@ class TestConfigAuth(TestConfig):
         host = self.sched.hosts.find_by_name("dbsrv1")
         host.__class__.use_aggressive_host_checking = 1
 
-    def tearDown(self):
-        self.stop_nagios()
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists(self.livestatus_broker.pnp_path):
-            shutil.rmtree(self.livestatus_broker.pnp_path)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
 
     """
 dbsrv1  adm(adm1,adm2,adm3)
