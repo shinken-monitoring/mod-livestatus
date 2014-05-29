@@ -95,6 +95,11 @@ class LiveStatusResponse:
             # There is no pre-selected list of columns. In this case
             # we output all columns.
         if self.outputformat == 'csv':
+            from StringIO import StringIO
+            import csv
+            f = StringIO()
+            w = csv.writer(f, delimiter=self.separators[1],
+                              lineterminator=self.separators[0])
             for item in result:
                 # Construct one line of output for each object found
                 l = []
@@ -122,7 +127,7 @@ class LiveStatusResponse:
                             l.append(value.encode('utf-8', 'replace'))
                         except Exception:
                             l.append('')
-                lines.append(self.separators[1].join(l))
+                lines.append(l)
             if len(lines) > 0:
                 if self.columnheaders != 'off' or not query_with_columns:
                     if len(aliases) > 0:
@@ -137,10 +142,11 @@ class LiveStatusResponse:
             if showheader:
                 if len(aliases) > 0:
                     # This is for statements like "Stats: .... as alias_column
-                    lines.insert(0, self.separators[1].join([aliases[col] for col in columns]))
+                    lines.insert(0, [aliases[col] for col in columns])
                 else:
-                    lines.insert(0, self.separators[1].join(columns))
-            self.output = self.separators[0].join(lines)
+                    lines.insert(0, columns)
+            w.writerows(lines)
+            self.output = f.read()
 
         elif self.outputformat == 'json' or self.outputformat == 'python':
             for item in result:
