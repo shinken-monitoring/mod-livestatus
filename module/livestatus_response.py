@@ -146,6 +146,7 @@ class LiveStatusResponse:
                 else:
                     lines.insert(0, columns)
             w.writerows(lines)
+            f.seek(0)
             self.output = f.read()
 
         elif self.outputformat == 'json' or self.outputformat == 'python':
