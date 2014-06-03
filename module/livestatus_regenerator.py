@@ -263,10 +263,13 @@ class LiveStatusRegenerator(Regenerator):
         # For services: key is a servicegroup_name, value is an array with all service_ids of the services in this group
         setattr(self.services, '_id_by_servicegroup_name_heap', dict())
         [self.services._id_by_servicegroup_name_heap.setdefault(get_obj_full_name(sg), []).append(k) for (k, v) in self.services.items.iteritems() for sg in v.servicegroups]
+        for sg in self.services._id_by_servicegroup_name_heap.keys():
+            self.services._id_by_servicegroup_name_heap[sg].sort(key=lambda x: get_obj_full_name(self.services[x]))
         # For services: key is a hostgroup_name, value is an array with all service_ids of the hosts in this group
         setattr(self.services, '_id_by_hostgroup_name_heap', dict())
         [self.services._id_by_hostgroup_name_heap.setdefault(get_obj_full_name(hg), []).append(k) for (k, v) in self.services.items.iteritems() for hg in v.host.hostgroups]
-
+        for hg in self.services._id_by_hostgroup_name_heap.keys():
+            self.services._id_by_hostgroup_name_heap[hg].sort(key=lambda x: get_obj_full_name(self.services[x]))
 
 
         # print self.services._id_by_host_name_heap
