@@ -39,6 +39,8 @@ except ImportError:
         JSONEncoder.item_separator = ','
         JSONEncoder.key_separator = ':'
 
+from StringIO import StringIO
+import csv
 
 class LiveStatusResponse:
 
@@ -95,8 +97,6 @@ class LiveStatusResponse:
             # There is no pre-selected list of columns. In this case
             # we output all columns.
         if self.outputformat == 'csv':
-            from StringIO import StringIO
-            import csv
             f = StringIO()
             w = csv.writer(f, delimiter=self.separators[1],
                               lineterminator=self.separators[0])
