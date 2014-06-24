@@ -448,6 +448,11 @@ livestatus_attribute_map = {
             'function': lambda item, req: item.is_problem,
             'datatype': bool,
         },
+        'labels': {
+            'description': 'Arbitrary labels (separated by comma character)',
+            'function': lambda item, req: item.labels,
+            'datatype': list,
+        },
         'last_check': {
             'description': 'Time of the last check (Unix timestamp)',
             'function': lambda item, req: int(item.last_chk),
@@ -1282,6 +1287,11 @@ livestatus_attribute_map = {
             'description': 'Whether the host state is a problem or not (0/1)',
             'function': lambda item, req: item.is_problem,
             'datatype': bool,
+        },
+        'labels': {
+            'description': 'Arbitrary labels (separated by comma character)',
+            'function': lambda item, req: item.labels,
+            'datatype': list,
         },
         'latency': {
             'description': 'Time difference between scheduled check time and actual check time',
