@@ -13,34 +13,6 @@ sys.path.append('../shinken/modules')
 from shinken.comment import Comment
 
 
-class TestConfig(ShinkenModulesTest):
-    def contains_line(self, text, pattern):
-        regex = re.compile(pattern)
-        for line in text.splitlines():
-            if re.search(regex, line):
-                return True
-        return False
-
-    def tearDown(self):
-        self.livestatus_broker.db.commit()
-        self.livestatus_broker.db.close()
-        if os.path.exists(self.livelogs):
-            os.remove(self.livelogs)
-        if os.path.exists(self.livelogs + "-journal"):
-            os.remove(self.livelogs + "-journal")
-        if os.path.exists("tmp/archives"):
-            for db in os.listdir("tmp/archives"):
-                print "cleanup", db
-                os.remove(os.path.join("tmp/archives", db))
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.livestatus_broker = None
-
-
 class TestConfigBig(TestConfig):
     def setUp(self):
 
