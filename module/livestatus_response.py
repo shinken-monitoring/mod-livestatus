@@ -148,6 +148,8 @@ class LiveStatusResponse:
             w.writerows(lines)
             f.seek(0)
             self.output = f.read()
+            self.output = self.output[:-1]
+            #import pdb; pdb.set_trace()
 
         elif self.outputformat == 'json' or self.outputformat == 'python':
             for item in result:
