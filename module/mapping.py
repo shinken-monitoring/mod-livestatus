@@ -713,6 +713,11 @@ livestatus_attribute_map = {
             'description': 'The name of in image file for the status map',
             'function': lambda item, req: item.statusmap_image,
         },
+        'tags': {
+            'description': 'The list of Host Tags',
+            'function': lambda item, req: [join_with_separators(req, x) for x in item.tags],
+            'datatype': list,
+        },
         'total_services': {
             'description': 'The total number of services of the host',
             'function': lambda item, req: "",  # REPAIRME
@@ -1217,6 +1222,9 @@ livestatus_attribute_map = {
         },
         'host_statusmap_image': {
             'description': 'The name of in image file for the status map',
+        },
+        'host_tags': {
+            'description': 'The list of Host Tags',
         },
         'host_total_services': {
             'description': 'The total number of services of the host',
