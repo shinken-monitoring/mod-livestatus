@@ -61,7 +61,9 @@ class LiveStatusCommandQuery(LiveStatusQuery):
 
         if self.extcmd:
             # External command are send back to broker
-            self.extcmd = self.extcmd.decode('utf8', 'replace')
+            
+            # Somehow this line seems to prevent us from sending external commands from THruk with accents.
+            #self.extcmd = self.extcmd.decode('utf8', 'replace')
             e = ExternalCommand(self.extcmd)
             self.return_queue.put(e)
             return []
