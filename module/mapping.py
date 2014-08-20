@@ -47,8 +47,7 @@ from shinken.receiverlink import ReceiverLink
 from shinken.pollerlink import PollerLink
 from shinken.log import logger
 from log_line import LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline, LoglineWrongFormat
-from shinken.external_command import MODATTR_NONE, MODATTR_NOTIFICATIONS_ENABLED, MODATTR_ACTIVE_CHECKS_ENABLED, MODATTR_PASSIVE_CHECKS_ENABLED, MODATTR_EVENT_HANDLER_ENABLED, MODATTR_FLAP_DETECTION_ENABLED, MODATTR_FAILURE_PREDICTION_ENABLED, MODATTR_PERFORMANCE_DATA_ENABLED, MODATTR_OBSESSIVE_HANDLER_ENABLED, MODATTR_EVENT_HANDLER_COMMAND, MODATTR_CHECK_COMMAND, MODATTR_NORMAL_CHECK_INTERVAL, MODATTR_RETRY_CHECK_INTERVAL, MODATTR_MAX_CHECK_ATTEMPTS, MODATTR_FRESHNESS_CHECKS_ENABLED, MODATTR_CHECK_TIMEPERIOD, MODATTR_CUSTOM_VARIABLE, MODATTR_NOTIFICATION_TIMEPERIOD
-
+from shinken.misc.common import DICT_MODATTR
 
 class Problem:
     def __init__(self, source, impacts):
@@ -57,30 +56,12 @@ class Problem:
 
 
 def modified_attributes_names(self):
-    names_list = []
-    names = {
-        MODATTR_NOTIFICATIONS_ENABLED: 'notifications_enabled',
-        MODATTR_ACTIVE_CHECKS_ENABLED: 'active_checks_enabled',
-        MODATTR_PASSIVE_CHECKS_ENABLED: 'passive_checks_enabled',
-        MODATTR_EVENT_HANDLER_ENABLED: 'event_handler_enabled',
-        MODATTR_FLAP_DETECTION_ENABLED: 'flap_detection_enabled',
-        MODATTR_FAILURE_PREDICTION_ENABLED: 'failure_prediction_enabled',
-        MODATTR_PERFORMANCE_DATA_ENABLED: 'performance_data_enabled',
-        MODATTR_OBSESSIVE_HANDLER_ENABLED: 'obsessive_handler_enabled',
-        MODATTR_EVENT_HANDLER_COMMAND: 'event_handler_command',
-        MODATTR_CHECK_COMMAND: 'check_command',
-        MODATTR_NORMAL_CHECK_INTERVAL: 'normal_check_interval',
-        MODATTR_RETRY_CHECK_INTERVAL: 'retry_check_interval',
-        MODATTR_MAX_CHECK_ATTEMPTS: 'max_check_attempts',
-        MODATTR_FRESHNESS_CHECKS_ENABLED: 'freshness_checks_enabled',
-        MODATTR_CHECK_TIMEPERIOD: 'check_timeperiod',
-        MODATTR_CUSTOM_VARIABLE: 'custom_variable',
-        MODATTR_NOTIFICATION_TIMEPERIOD: 'notification_timeperiod',
-    }
-    for attr in [MODATTR_NONE, MODATTR_NOTIFICATIONS_ENABLED, MODATTR_ACTIVE_CHECKS_ENABLED, MODATTR_PASSIVE_CHECKS_ENABLED, MODATTR_EVENT_HANDLER_ENABLED, MODATTR_FLAP_DETECTION_ENABLED, MODATTR_FAILURE_PREDICTION_ENABLED, MODATTR_PERFORMANCE_DATA_ENABLED, MODATTR_OBSESSIVE_HANDLER_ENABLED, MODATTR_EVENT_HANDLER_COMMAND, MODATTR_CHECK_COMMAND, MODATTR_NORMAL_CHECK_INTERVAL, MODATTR_RETRY_CHECK_INTERVAL, MODATTR_MAX_CHECK_ATTEMPTS, MODATTR_FRESHNESS_CHECKS_ENABLED, MODATTR_CHECK_TIMEPERIOD, MODATTR_CUSTOM_VARIABLE, MODATTR_NOTIFICATION_TIMEPERIOD]:
-        if self.modified_attributes & attr:
-            names_list.append(names[attr])
-    return names_list
+    names_list = set()
+
+    for attr in DICT_MODATTR:
+        if self.modified_attributes & DICT_MODATTR[attr].value:
+            names_list.add(DICT_MODATTR[attr].attribute)
+    return list(names_list)
 
 
 def join_with_separators(request, *args):
