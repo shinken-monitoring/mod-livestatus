@@ -292,7 +292,7 @@ class LiveStatusRegenerator(Regenerator):
             safe_print("Creating Contact:", cname)
             c = Contact({})
             self.update_element(c, data)
-            self.contacts[c.id] = c
+            self.contacts.add_item(c)
 
         # Now manage notification ways too
         # Same than for contacts. We create or
@@ -306,7 +306,7 @@ class LiveStatusRegenerator(Regenerator):
             if not nw:
                 safe_print("Creating notif way", nwname)
                 nw = NotificationWay([])
-                self.notificationways[nw.id] = nw
+                self.notificationways.add_item(nw)
             # Now update it
             for prop in NotificationWay.properties:
                 if hasattr(cnw, prop):
@@ -323,11 +323,6 @@ class LiveStatusRegenerator(Regenerator):
             self.linkify_a_timeperiod(nw, 'service_notification_period')
 
         c.notificationways = new_notifways
-
-        # Ok, declare this contact now :)
-        # And notif ways too
-        self.contacts.create_reversed_list()
-        self.notificationways.create_reversed_list()
 
     def register_cache(self, cache):
         self.cache = cache
