@@ -501,9 +501,16 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 response.format_live_data(result, query.columns, query.aliases)
                                 output, keepalive = response.respond()
                                 try:
-                                    s.send(output)
-                                    self.write_protocol(response=output)
+                                    totalsent = 0
+                                    while totalsent < len(output):
+                                        sent = s.send(output[totalsent:])
+                                        if sent == 0:
+                                            raise RuntimeError("socket connection broken")
+                                        self.write_protocol('', output[totalsent:], sent)
+                                        totalsent = totalsent + sent
                                 except Exception, e:
+                                    if self.debug_queries:
+                                        print "EXCEPTION: %s \n\n\n" % str(e)
                                     pass
                                 open_connections[socketid]['buffer'] = None
                                 del open_connections[socketid]['wait']
@@ -522,9 +529,16 @@ class LiveStatus_broker(BaseModule, Daemon):
                                     response.format_live_data(result, query.columns, query.aliases)
                                     output, keepalive = response.respond()
                                     try:
-                                        s.send(output)
-                                        self.write_protocol(response=output)
+                                        totalsent = 0
+                                        while totalsent < len(output):
+                                            sent = s.send(output[totalsent:])
+                                            if sent == 0:
+                                                raise RuntimeError("socket connection broken")
+                                            self.write_protocol('', output[totalsent:], sent)
+                                            totalsent = totalsent + sent
                                     except Exception, e:
+                                        if self.debug_queries:
+                                            print "EXCEPTION: %s \n\n\n" % str(e)
                                         pass
                                     open_connections[socketid]['buffer'] = None
                                     del open_connections[socketid]['wait']
@@ -659,9 +673,16 @@ class LiveStatus_broker(BaseModule, Daemon):
                             response, keepalive = self.livestatus.handle_request(open_connections[socketid]['buffer'])
                             if isinstance(response, str):
                                 try:
-                                    s.send(response)
-                                    self.write_protocol(response=response)
-                                except:
+                                    totalsent = 0
+                                    while totalsent < len(response):
+                                        sent = s.send(response[totalsent:])
+                                        if sent == 0:
+                                            raise RuntimeError("socket connection broken")
+                                        self.write_protocol('', response[totalsent:], sent)
+                                        totalsent = totalsent + sent
+                                except Exception, e:
+                                    if self.debug_queries:
+                                        print "EXCEPTION: %s \n\n\n" % str(e)
                                     # Maybe the request was an external command and
                                     # the peer is not interested in a response at all
                                     pass
@@ -718,9 +739,10 @@ class LiveStatus_broker(BaseModule, Daemon):
 
         self.do_stop()
 
-    def write_protocol(self, request=None, response=None):
+    def write_protocol(self, request=None, response=None, sent=0):
         if self.debug_queries:
             if request is not None:
                 print "REQUEST>>>>>\n" + request + "\n\n"
             if response is not None:
-                print "RESPONSE<<<<\n" + response + "\n\n"
+                print "RESPONSE<<<<\n" + response + "\n"
+                print "RESPONSE SENT<<<<\n %s \n\n" % sent
