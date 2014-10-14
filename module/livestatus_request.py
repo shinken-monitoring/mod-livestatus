@@ -67,12 +67,12 @@ class LiveStatusRequest:
             keyword = line.split(' ')[0].rstrip(':')
             if len(line) == 0:
                 pass
-            elif keyword in ('GET'):
+            elif keyword in ('GET',):
                 query_cmds.append(line)
                 wait_cmds.append(line)
             elif keyword in ('WaitObject', 'WaitCondition', 'WaitConditionOr', 'WaitConditionAnd', 'WaitTrigger', 'WaitTimeout'):
                 wait_cmds.append(line)
-            elif keyword in ('COMMAND'):
+            elif keyword in ('COMMAND',):
                 external_cmds.append(line)
             else:
                 query_cmds.append(line)
