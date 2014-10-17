@@ -25,20 +25,25 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_modules import *
+
 import os
 import re
-import subprocess
-import shutil
+import sys
 import time
 import random
-import copy
 
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
 from shinken.comment import Comment
 from shinken.util import from_bool_to_int
+from shinken.schedulerlink import SchedulerLink
+from shinken.reactionnerlink import ReactionnerLink
+from shinken.pollerlink import PollerLink
+from shinken.brokerlink import BrokerLink
+
+
+from shinken_modules import TestConfig
+
 
 sys.setcheckinterval(10000)
 
