@@ -1257,13 +1257,11 @@ Stats: max execution_time"""
 
         creation_tab = {'scheduler_name': 'scheduler-1', 'address': 'localhost', 'spare': '0'}
         schedlink = SchedulerLink(creation_tab)
-        schedlink.pythonize()
         schedlink.alive = True
         b = schedlink.get_initial_status_brok()
         self.sched.add(b)
         creation_tab = {'scheduler_name': 'scheduler-2', 'address': 'othernode', 'spare': '1'}
         schedlink = SchedulerLink(creation_tab)
-        schedlink.pythonize()
         schedlink.alive = True
         b2 = schedlink.get_initial_status_brok()
         self.sched.add(b2)
@@ -1302,13 +1300,11 @@ localhost;1;scheduler-1;7768;0;1
         self.update_broker()
         creation_tab = {'reactionner_name': 'reactionner-1', 'address': 'localhost', 'spare': '0'}
         reac = ReactionnerLink(creation_tab)
-        reac.pythonize()
         reac.alive = True
         b = reac.get_initial_status_brok()
         self.sched.add(b)
         creation_tab = {'reactionner_name': 'reactionner-2', 'address': 'othernode', 'spare': '1'}
         reac = ReactionnerLink(creation_tab)
-        reac.pythonize()
         reac.alive = True
         b2 = reac.get_initial_status_brok()
         self.sched.add(b2)
@@ -1348,13 +1344,11 @@ othernode;0;reactionner-2;7769;1
 
         creation_tab = {'poller_name': 'poller-1', 'address': 'localhost', 'spare': '0'}
         pol = PollerLink(creation_tab)
-        pol.pythonize()
         pol.alive = True
         b = pol.get_initial_status_brok()
         self.sched.add(b)
         creation_tab = {'poller_name': 'poller-2', 'address': 'othernode', 'spare': '1'}
         pol = PollerLink(creation_tab)
-        pol.pythonize()
         pol.alive = True
         b2 = pol.get_initial_status_brok()
         self.sched.add(b2)
@@ -1398,13 +1392,11 @@ othernode;0;poller-2;7771;1
 
         creation_tab = {'broker_name': 'broker-1', 'address': 'localhost', 'spare': '0'}
         pol = BrokerLink(creation_tab)
-        pol.pythonize()
         pol.alive = True
         b = pol.get_initial_status_brok()
         self.sched.add(b)
         creation_tab = {'broker_name': 'broker-2', 'address': 'othernode', 'spare': '1'}
         pol = BrokerLink(creation_tab)
-        pol.pythonize()
         pol.alive = True
         b2 = pol.get_initial_status_brok()
         self.sched.add(b2)

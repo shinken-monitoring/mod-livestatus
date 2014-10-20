@@ -105,9 +105,9 @@ def find_pnp_perfdata_xml(name, request):
         if '/' in name:
             # It is a service
 
-	    # replace space, colon, slash and backslash to be PNP compliant
-	    name = name.split('/', 1)
-	    name[1] = re.sub(r'[ :\/\\]', '_', name[1])
+            # replace space, colon, slash and backslash to be PNP compliant
+            name = name.split('/', 1)
+            name[1] = re.sub(r'[ :\/\\]', '_', name[1])
 
             if os.access(request.pnp_path + '/' + '/'.join(name) + '.xml', os.R_OK):
                 return 1
@@ -275,7 +275,7 @@ livestatus_attribute_map = {
         },
         'contact_groups': {
             'description': 'A list of all contact groups this host is in',
-            'function': lambda item, req: item.contact_groups.split(','),
+            'function': lambda item, req: item.contact_groups,
             'datatype': list,
         },
         'criticity': {
@@ -814,7 +814,7 @@ livestatus_attribute_map = {
         },
         'contact_groups': {
             'description': 'A list of all contact groups this service is in',
-            'function': lambda item, req: item.contact_groups.split(','),
+            'function': lambda item, req: item.contact_groups,
             'datatype': list,
         },
         'criticity': {
