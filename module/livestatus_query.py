@@ -262,8 +262,8 @@ class LiveStatusQuery(object):
                 _, ornum = self.split_option(line)
                 self.stats_filter_stack.or_elements(ornum)
             elif keyword == 'Separators':
-                _, sep1, sep2, sep3, sep4 = line.split(' ', 5)
-                self.response.separators = Separators(sep1, sep2, sep3, sep4)
+                separators = map(lambda sep: chr(int(sep)), line.split(' ', 5)[1:])
+                self.response.separators = Separators(*separators)
             elif keyword == 'Localtime':
                 _, self.client_localtime = self.split_option(line)
             elif keyword == 'COMMAND':
