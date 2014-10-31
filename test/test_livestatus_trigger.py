@@ -25,8 +25,9 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_modules import *
+
 import os
+import sys
 import re
 import subprocess
 import shutil
@@ -34,10 +35,14 @@ import time
 import random
 import copy
 
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
+
+from shinken_modules import ShinkenModulesTest
 from shinken.comment import Comment
+
+from shinken_test import time_hacker
+
+from mock_livestatus import mock_livestatus_handle_request
+
 
 sys.setcheckinterval(10000)
 
@@ -45,7 +50,7 @@ sys.setcheckinterval(10000)
 time_hacker.set_real_time()
 
 
-
+@mock_livestatus_handle_request
 class TestConfig(ShinkenModulesTest):
     def contains_line(self, text, pattern):
         regex = re.compile(pattern)
@@ -274,6 +279,7 @@ class TestConfig(ShinkenModulesTest):
         time.sleep(5)
 
 
+@mock_livestatus_handle_request
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
@@ -418,6 +424,7 @@ ColumnHeaders: off
         print response
         response.format_live_data(result, query.columns, query.aliases)
         output, keepalive = response.respond()
+        output = ''.join(output)
         self.assert_(output.strip())
 
     def test_multiple_externals(self):

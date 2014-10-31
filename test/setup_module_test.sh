@@ -23,7 +23,7 @@ git clone https://github.com/naparuba/shinken.git ~/shinken
 [ -f test/dep_modules.txt ] && setup_submodule
 [ -f requirements.txt ] && pip install -r requirements.txt
 rm ~/shinken/test/test_*.py
-cp test/test_*.py ~/shinken/test/
+cp test/*.py ~/shinken/test/
 [ -d test/etc ] && cp -r test/etc ~/shinken/test/
 cp -r module ~/shinken/modules/$name
 ln -sf ~/shinken/modules ~/shinken/test/modules
