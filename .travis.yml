@@ -4,9 +4,13 @@ python:
   - "2.6"
 
 install:
-  - "[ -d test ] && ./test/setup_module_test.sh || : "
+  - ./test/setup_module_test.sh
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install --use-mirrors -r requirements-py26.txt ; fi
 
-script: "[ -d test ] && cd ~/shinken/test && nosetests -vx --with-coverage --cover-package=module || :"
+script:
+  - cd ~/shinken/test
+  - export PYTHONPATH=~/shinken
+  - nosetests -vx --process-restartworker  --processes=1 --process-timeout=1800
 
 after_success:
   coveralls

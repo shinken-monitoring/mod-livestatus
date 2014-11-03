@@ -42,13 +42,14 @@ from shinken.reactionnerlink import ReactionnerLink
 from shinken.pollerlink import PollerLink
 from shinken.brokerlink import BrokerLink
 
-
 from shinken_modules import TestConfig
+
+from mock_livestatus import mock_livestatus_handle_request
 
 
 sys.setcheckinterval(10000)
 
-
+@mock_livestatus_handle_request
 class TestConfigSmall(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
@@ -180,7 +181,7 @@ Filter: serialnumber = localhost
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "response", response
-        self.assert_(response == goodresponse)
+        self.assertEqual(response, goodresponse)
 
         # this time as fixed16
         request = """GET hosts
@@ -716,7 +717,8 @@ Columns: author comment end_time entry_time fixed host_name id start_time
 Separators: 10 59 44 124"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response.startswith("lausser;blablubhost;"))
+        expected = "lausser;blablubhost;"
+        self.assertEqual(expected, response[:len(expected)])
         if self.nagios_installed():
             #time.sleep(10)
             nagresponse = self.ask_nagios(request)
@@ -2282,6 +2284,7 @@ Columns: description host_name display_name"""
         self.assert_(response == 'test_ok_0;test_host_0;test_ok_0\n')
 
 
+@mock_livestatus_handle_request
 class TestConfigComplex(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/shinken_problem_impact.cfg')

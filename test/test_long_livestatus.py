@@ -26,23 +26,24 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_modules import *
 import os
-import re
-import subprocess
-import shutil
+import sys
 import time
 import random
-import copy
+import unittest
 
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
+
+from shinken_modules import TestConfig
 from shinken.comment import Comment
-from shinken.util import from_bool_to_int
+
+from mock_livestatus import mock_livestatus_handle_request
+
 
 sys.setcheckinterval(10000)
 
+
+
+@mock_livestatus_handle_request
 class TestConfigBig(TestConfig):
     def setUp(self):
         start_setUp = time.time()
@@ -1199,7 +1200,7 @@ Filter: name = test_router_0
 Columns: name display_name"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == 'test_router_0;display_router_0\n')
+        self.assertEqual('test_router_0;display_router_0\n', response)
         request = """GET services
 Filter: host_name = test_host_000
 Filter: description = test_unknown_00
