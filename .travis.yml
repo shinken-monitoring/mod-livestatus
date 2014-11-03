@@ -10,7 +10,7 @@ install:
 script:
   - cd ~/shinken/test
   - export PYTHONPATH=~/shinken
-  - nosetests -vx --with-coverage --cover-package=modules --process-timeout=1800 --process-restartworker
+  - nosetests -vx --with-coverage --cover-package=modules --process-timeout=1800 --process-restartworker --processes=1
 
 after_success:
   coveralls
