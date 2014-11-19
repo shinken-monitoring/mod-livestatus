@@ -11,6 +11,7 @@ import copy
 import traceback
 
 from shinken.log import logger
+
 from .livestatus_obj import LiveStatus
 from .livestatus_response import LiveStatusListResponse
 from .livestatus_query_error import LiveStatusQueryError
@@ -109,15 +110,26 @@ class LiveStatusClientThread(threading.Thread):
             if exceptready:
                 raise Error.client_error
             if inputready:
-                data = self._read()
-                if data:
-                    self.buffer_list.append(data)
-                    if self._has_query():
-                        self.last_query_time = time.time()
-                        full_request = b''.join(self.buffer_list)
+                try:
+                    data = self._read()
+                except Error.ClientLeft:
+                     # very special case : if we already got some data,
+                    if self.buffer_list and self.buffer_list[-1][-1] == '\n':
+                        # then try to consider it as a valid query
+                        self.logger.warn("Have a query not fully terminated but input closed by remote side.. "
+                                        "Let's consider this as a valid query and try process it..")
+                        ret = b''.join(self.buffer_list)
                         del self.buffer_list[:]
-                        return full_request
-                    continue
+                        return ret
+                    raise # otherwise simply let the ClientLeft propagate.
+
+                self.buffer_list.append(data)
+                if self._has_query():
+                    self.last_query_time = time.time()
+                    full_request = b''.join(self.buffer_list)
+                    del self.buffer_list[:]
+                    return full_request
+                continue
             if time.time() > timeout_time:
                 raise Error.ClientTimeout('Timeout reading full request from client')
             timeout_time += self.read_timeout
