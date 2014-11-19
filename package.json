@@ -20,7 +20,7 @@
     "LQL"
   ],
   "dependencies": {
-    "shinken": ">=1.4"
+    "shinken": ">=2.2"
   },
   "license": "AGPL"
 }
