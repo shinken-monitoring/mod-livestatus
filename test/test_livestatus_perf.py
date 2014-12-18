@@ -26,7 +26,7 @@ import sys
 import random
 import copy
 
-from shinken_test import unittest
+from shinken_test import unittest, ShinkenTest
 
 sys.setcheckinterval(10000)
 
