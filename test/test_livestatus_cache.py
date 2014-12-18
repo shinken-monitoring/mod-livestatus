@@ -1,17 +1,18 @@
-from shinken_modules import *
+
+
+
 import os
 import sys
-import re
-import subprocess
-import shutil
+import datetime
 import time
 import random
-import copy
+
+from shinken_test import unittest, time_hacker
 
 sys.path.append('../shinken/modules')
 
+from shinken_modules import TestConfig
 from shinken.comment import Comment
-
 
 from mock_livestatus import mock_livestatus_handle_request
 

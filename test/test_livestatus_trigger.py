@@ -39,7 +39,7 @@ import copy
 from shinken_modules import ShinkenModulesTest
 from shinken.comment import Comment
 
-from shinken_test import time_hacker
+from shinken_test import time_hacker, unittest
 
 from mock_livestatus import mock_livestatus_handle_request
 

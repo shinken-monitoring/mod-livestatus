@@ -25,27 +25,19 @@
 # This file is used to test host- and service-downtimes.
 #
 
-from shinken_modules import *
 import os
-import re
-import subprocess
-import shutil
+import sys
 import time
 import random
-import copy
 
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
 from shinken.comment import Comment
-from shinken.util import from_bool_to_int
-from test_livestatus import TestConfig
+
+from test_livestatus import TestConfig, unittest
 
 from mock_livestatus import mock_livestatus_handle_request
 
 
 sys.setcheckinterval(10000)
-
 
 
 @mock_livestatus_handle_request

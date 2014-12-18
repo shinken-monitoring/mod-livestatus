@@ -31,7 +31,8 @@ import re
 import sys
 import time
 import random
-import unittest
+
+from shinken_test import unittest
 
 from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod

@@ -26,7 +26,10 @@
 # This file is used to test *allowed_hosts* parameter of Livestatus module
 #
 
-from shinken_test import *
+import sys
+import os
+
+from shinken_test import time_hacker, unittest
 import time
 import random
 import socket
@@ -135,6 +138,8 @@ class TestConfigAuth(TestConfig):
 
         # test livestatus connection
         self.assertFalse(self.query_livestatus(modconf.host, int(modconf.port), "GET hosts\n\n"))
+
+
 
 if __name__ == '__main__':
     #import cProfile

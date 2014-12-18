@@ -23,20 +23,14 @@
 
 import os
 import sys
-import re
-import subprocess
-import shutil
 import time
 import random
 import copy
-import unittest
 
+from shinken_test import unittest
 
 from shinken_modules import ShinkenModulesTest
-from shinken.brok import Brok
-from shinken.objects.timeperiod import Timeperiod
-from shinken.objects.module import Module
-from shinken.comment import Comment
+
 from mock_livestatus import mock_livestatus_handle_request
 
 
