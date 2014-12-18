@@ -28,6 +28,7 @@ git clone https://github.com/naparuba/shinken.git ~/shinken
 spec_requirement="requirements-${py_version_short}.txt"
 [ -f "$spec_requirement" ] && pip install --use-mirrors -r "$spec_requirement"
 test_requirement="test/requirements.txt"
+[ -f "$test_requirement" ] && pip install --use-mirrors -r "$test_requirement"
 rm ~/shinken/test/test_*.py
 cp test/*.py ~/shinken/test/
 [ -d test/etc ] && cp -r test/etc ~/shinken/test/
