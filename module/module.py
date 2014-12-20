@@ -509,6 +509,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # while updating
     def manage_lql_thread(self):
         logger.info("[Livestatus Broker] Livestatus query thread started")
+        self.db.open() # make sure to open the db in this thread..
         # This is the main object of this broker where the action takes place
         self.livestatus = LiveStatus(self.datamgr, self.query_cache, self.db, self.pnp_path, self.from_q)
         self.create_listeners()
