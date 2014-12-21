@@ -176,9 +176,28 @@ class LiveStatusClientThread(threading.Thread):
     def request_stop(self):
         self.stop_requested = True
 
+    def handle_wait_query(self, wait, query):
+        while not self.stop_requested:
+            if wait.wait_timeout:
+                now = time.time()
+                if now - wait.wait_start > wait.wait_timeout:
+                    break
+            elif wait.condition_fulfilled():
+                break
+            time.sleep(1)
+        else:
+            raise Error.Interrupted
+        output, _ = query.process_query()
+        return output
+
+
     def handle_request(self, request_data):
         response, _ = self.livestatus.handle_request(request_data)
+
         try:
+            if not isinstance(response, (LiveStatusListResponse, type(b''))):
+                # must be a wait query..
+                response = self.handle_wait_query(*response)
             self.send_response(response)
         except LiveStatusQueryError as err:
             code, detail = err.args
