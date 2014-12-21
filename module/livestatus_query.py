@@ -179,8 +179,11 @@ class LiveStatusQuery(object):
             elif keyword == 'Filter':
                 try:
                     _, attribute, operator, reference = self.split_option(line, 3)
-                except:
-                    _, attribute, operator, reference = self.split_option(line, 2) + ['']
+                except ValueError as err:
+                    try:
+                        _, attribute, operator, reference = self.split_option(line, 2) + ['']
+                    except ValueError as err:
+                        raise LiveStatusQueryError(452, 'invalid Filter header')
                 if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=', '!=~', '!~', '!~~']:
                     # Cut off the table name
                     attribute = self.strip_table_from_column(attribute)

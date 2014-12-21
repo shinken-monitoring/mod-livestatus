@@ -205,12 +205,8 @@ Columns: name state
 Filter: localhost
 ResponseHeader: fixed16
 """
-        goodresponse = """452         106
-Completely invalid GET request 'GET hosts
-Columns: name state
-Filter: localhost
-ResponseHeader: fixed16
-'
+        goodresponse = """452          55
+Completely invalid GET request \'invalid Filter header\'
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
