@@ -274,6 +274,11 @@ class LiveStatusQuery(object):
                 pass
         self.metainfo = LiveStatusQueryMetainfo(data)
 
+    def process_query(self):
+        result = self.launch_query()
+        self.response.format_live_data(result, self.columns, self.aliases)
+        return self.response.respond()
+
     def launch_query(self):
         """ Prepare the request object's filter stacks """
 
