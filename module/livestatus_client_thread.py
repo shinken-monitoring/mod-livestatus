@@ -89,7 +89,7 @@ class LiveStatusClientThread(threading.Thread):
             data = self.client_sock.recv(size)
         except socket.error as err:
             if err.args[0] == errno.EWOULDBLOCK: # but should not happen as we are in non-blocking mode..
-                return
+                return b''
             else:
                 raise Error.ClientReadError('Could not read from client: %s' % err)
         if not data:
