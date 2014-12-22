@@ -183,7 +183,17 @@ class LiveStatusResponse:
         return (',' if line_nr else '') + dumps(row)
 
     def _python_end_row(self, row, line_nr=0):
-        return (',' if line_nr else '') + str(row)
+        ret = [',' if line_nr else '']
+        ret.append('[')
+        for item in row:
+            if isinstance(item, unicode):
+                item = item.encode('UTF-8')
+            ret.append(repr(item))
+            ret.append(', ')
+        if row:
+            del ret[-1] # skip last ','
+        ret.append(']')
+        return ''.join(ret)
 
     _format_2_value_handler = {
         'csv':      (_csv_end_row, _format_csv_value),
