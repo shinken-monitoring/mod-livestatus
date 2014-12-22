@@ -54,7 +54,7 @@ class TestFull_WaitQuery(TestConfig):
         super(TestFull_WaitQuery, self).tearDown()
 
     def setUp(self):
-        self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
+        super(TestFull_WaitQuery, self).setUp()
         time_hacker.set_real_time()
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.modconf = Module({'module_name': 'LiveStatus',
