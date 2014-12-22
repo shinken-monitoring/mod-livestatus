@@ -50,8 +50,7 @@ from mock_livestatus import mock_livestatus_handle_request
 
 sys.setcheckinterval(10000)
 
-@mock_livestatus_handle_request
-class TestConfigSmall(TestConfig):
+class LiveStatusTest(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
         Comment.id = 1
@@ -70,6 +69,9 @@ class TestConfigSmall(TestConfig):
         host = self.sched.hosts.find_by_name("test_host_0")
         host.__class__.use_aggressive_host_checking = 1
 
+
+@mock_livestatus_handle_request
+class TestConfigSmall(LiveStatusTest):
 
     def test_check_type(self):
         self.print_header()
