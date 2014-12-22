@@ -11,6 +11,7 @@ setup_submodule (){
     for dep in $(cat test/dep_modules.txt); do
         mname=$(basename $dep | sed 's/.git//g')
         git clone $dep ~/$mname
+        ( cd ~/$mname && git status && git log -1)
         rmname=$(get_name ~/$mname/)
         cp -r  ~/$mname/module ~/shinken/modules/$rmname
         [ -f ~/$mname/requirements.txt ] && pip install -r ~/$mname/requirements.txt
@@ -22,6 +23,7 @@ name=$(get_name)
 pip install pycurl
 pip install coveralls
 git clone https://github.com/naparuba/shinken.git ~/shinken
+( cd shinken && git status && git log -1)
 [ -f ~/shinken/test/requirements.txt ] && pip install -r ~/shinken/test/requirements.txt
 [ -f test/dep_modules.txt ] && setup_submodule
 [ -f requirements.txt ] && pip install -r requirements.txt
