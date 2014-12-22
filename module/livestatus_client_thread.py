@@ -66,20 +66,30 @@ class LiveStatusClientThread(threading.Thread):
         self.logger = logger
         self.last_query_time = None
 
-    def _has_query(self):
-        ''' Check if we have a valid query inside our buffer. For this we just looks if buffer ends with 2 CR ('\n') or its Windows form ('\r\n').
-        :return: True if yes, False otherwise.
+    def get_request(self):
+        ''' Try to get the next request available in our input buffer.
+        If there is one:
+            -> returns it (with its ending \n\n) and clear the input buffer of it.
+        If none is yet fully available:
+            -> returns None.
         '''
-        last_bytes = b''
-        idx = len(self.buffer_list) - 1
-        while idx >= 0:
-            last_bytes = self.buffer_list[idx] + last_bytes
-            if len(last_bytes) > 1 and last_bytes[-2:] == b'\n\n':
-                return True
-            if len(last_bytes) > 3:
-                return last_bytes[-4:] == b'\r\n\r\n'
-            idx -= 1
-        return False
+        buf = b''
+        for idx, data in enumerate(self.buffer_list):
+            buf += data
+            endline = buf.find('\n\n')
+            sz = 2
+            if endline < 0:
+                endline = buf.find('\r\n\r\n')
+                sz = 4
+            if endline >= 0:
+                for di in range(idx):
+                    del self.buffer_list[0]
+                self.buffer_list[0] = self.buffer_list[0][endline+sz:]
+                if not self.buffer_list[0]:
+                    del self.buffer_list[0]
+                self.n_requests += 1
+                return buf[:endline+sz]
+        return None
 
     def _read(self, size=RECV_SIZE):
         '''Read at most `size´ bytes of data.
@@ -105,6 +115,10 @@ class LiveStatusClientThread(threading.Thread):
         fds = [ self.client_sock ]
         timeout_time = time.time() + self.read_timeout
 
+        request = self.get_request() # there can be already buffered request
+        if request is not None:
+            return request
+
         while not self.stop_requested:
             inputready, _, exceptready = select.select(fds, [], [], 1)
             if exceptready:
@@ -113,8 +127,9 @@ class LiveStatusClientThread(threading.Thread):
                 try:
                     data = self._read()
                 except Error.ClientLeft:
-                     # very special case : if we already got some data,
-                    if self.buffer_list and self.buffer_list[-1][-1] == '\n':
+                    # very special case : if we already got some data,
+                    # AND it ends by a '\n' :
+                    if self.buffer_list and self.buffer_list[-1] and self.buffer_list[-1][-1] == '\n':
                         # then try to consider it as a valid query
                         self.logger.warn("Have a query not fully terminated but input closed by remote side.. "
                                         "Let's consider this as a valid query and try process it..")
@@ -124,11 +139,10 @@ class LiveStatusClientThread(threading.Thread):
                     raise # otherwise simply let the ClientLeft propagate.
 
                 self.buffer_list.append(data)
-                if self._has_query():
+                request = self.get_request()
+                if request is not None:
                     self.last_query_time = time.time()
-                    full_request = b''.join(self.buffer_list)
-                    del self.buffer_list[:]
-                    return full_request
+                    return request
                 continue
             if time.time() > timeout_time:
                 raise Error.ClientTimeout('Timeout reading full request from client')
