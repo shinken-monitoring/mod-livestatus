@@ -106,27 +106,28 @@ class TestFull_WaitQuery(TestConfig):
 
     def test_wait_query_1(self):
         wait_timeout_sec = randint(1, 3)
+        now = int( time.time() ) # current livestatus wants a INTEGER value for WaitTimeout ..
         request = b'''GET hosts
 WaitObject: test_host_0
-WaitCondition: last_check >= 1419007690
-WaitTimeout: %s
+WaitCondition: last_check >= {last_check}
+WaitTimeout: {wait_timeout}
 WaitTrigger: check
 Columns: last_check state plugin_output
 Filter: host_name = test_host_0
-Localtime: 1419007690
+Localtime: {localtime}
 OutputFormat: python
 KeepAlive: on
 ResponseHeader: fixed16
 ColumnHeaders: true
 
-''' % (wait_timeout_sec * 1000) # WaitTimeout header field is in millisecs
+'''.format(wait_timeout=wait_timeout_sec * 1000, last_check=now, localtime=now) # WaitTimeout header field is in millisecs
 
         t0 = time.time()
         response = self.query_livestatus(request)
         t1 = time.time()
         self.assertLess(wait_timeout_sec, t1 - t0,
-                        'wait query should take up to the requested WaitTimeout (%s sec) to complete' %
-                        wait_timeout_sec)
+                        '(in this specific case) WaitQuery should at least the requested WaitTimeout (%s sec) to complete ; response=%s' %
+                        (wait_timeout_sec, response))
         goodresponse = "200          13\n[[0, 0, '']]\n"
         self.assertEqual(goodresponse, response)
 
