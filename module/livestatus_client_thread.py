@@ -155,6 +155,8 @@ class LiveStatusClientThread(threading.Thread):
         raise Error.Interrupted('We have been interrupted')
 
     def _send_data(self, data):
+        if not data:
+            return
         fds = [ self.client_sock ]
         total_sent = 0
         len_data = len(data)
