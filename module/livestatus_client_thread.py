@@ -65,6 +65,10 @@ class LiveStatusClientThread(threading.Thread):
         self.write_timeout = self.read_timeout = 90  # TODO: use parameters from somewhere..
         self.logger = logger
         self.last_query_time = None
+        self.n_requests = 0 # number of requests received
+
+    def __str__(self):
+        return 'livestatus-th-%s nr=%s' % (self.ident, self.n_requests)
 
     def get_request(self):
         ''' Try to get the next request available in our input buffer.
