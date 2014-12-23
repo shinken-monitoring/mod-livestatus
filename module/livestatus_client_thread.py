@@ -196,12 +196,12 @@ class LiveStatusClientThread(threading.Thread):
 
     def handle_wait_query(self, wait, query):
         while not self.stop_requested:
-            if wait.wait_timeout:
+            if wait.condition_fulfilled():
+                break
+            elif wait.wait_timeout:
                 now = time.time()
                 if now - wait.wait_start > wait.wait_timeout:
                     break
-            elif wait.condition_fulfilled():
-                break
             time.sleep(1)
         else:
             raise Error.Interrupted
