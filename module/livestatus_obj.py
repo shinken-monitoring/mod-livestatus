@@ -95,7 +95,7 @@ class LiveStatus(object):
     def handle_request_and_fail(self, data):
         """Execute the livestatus request.
 
-        This function creates a LiveStatusRequest method, calls the parser,
+        This function creates a LiveStatusRequest instance, calls the parser,
         handles the execution of the request and formatting of the result.
         """
         request = LiveStatusRequest(data, self.datamgr, self.query_cache, self.db, self.pnp_path, self.return_queue, self.counters)
