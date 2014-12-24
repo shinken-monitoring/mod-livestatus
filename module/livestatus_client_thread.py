@@ -218,7 +218,8 @@ class LiveStatusClientThread(threading.Thread):
             if not isinstance(response, (LiveStatusListResponse, type(b''))):
                 # must be a wait query..
                 response = self.handle_wait_query(*response)
-            self.send_response(response)
+            if response:
+                self.send_response(response)
         except LiveStatusQueryError as err:
             code, detail = err.args
             response = LiveStatusResponse()
