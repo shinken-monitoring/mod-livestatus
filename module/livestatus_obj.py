@@ -105,13 +105,20 @@ class LiveStatus(object):
         if not _is_valid_queries(queries_type):
             logger.error("[Livestatus] We currently do not handle this kind of composed request: %s" % queries_type)
             return '', False
+
         cur_idx = 0
+        keepalive = False
+
         for query in queries: # process the command(s), if any.
-            # as they are sorted alphabetically once we get one which isn't a 'command'..
+            # as they are sorted alphabetically, once we get one which isn't a 'command'..
             if query.my_type != 'command': #  then we are done.
                 break
-            output, keepalive = query.process_query()
+            query.process_query()
+            # according to Check_Mk:
+            # COMMAND don't require a response, that is no response or more simply: an empty response:
+            output = ''
             cur_idx += 1
+
         if 'wait' in queries_type:
             keepalive = True
             # we return  'wait' first and 'query' second..
@@ -123,6 +130,7 @@ class LiveStatus(object):
                 and query == queries[cur_idx] and query.my_type == 'query'
             )
             output, keepalive = query.process_query()
+
         logger.debug("[Livestatus] Request duration %.4fs" % (time.time() - request.tic))
         return output, keepalive
 
