@@ -11,6 +11,8 @@ import threading
 import time
 
 from shinken.objects.module import Module
+from shinken.external_command import ExternalCommand
+
 from shinken_modules import TestConfig
 from shinken_test import time_hacker, unittest
 from test_livestatus import LiveStatusTest
@@ -114,12 +116,14 @@ class TestFull_WaitQuery(TestConfig):
         # and on how fast the command would be processed by the poller
         # and on how fast the host status would be updated after while within the livestatus process/thread.
 
-        wait_timeout_sec = randint(1, 3)
         now = int( time.time() ) # current livestatus wants an INTEGER value for WaitTimeout ..
-
+        host = 'test_host_0'
         # following request is nearly exactly what check_mk send (modulo the timestamps/hostname)
         # when you reschedule an immediate host check :
-        request = b'''COMMAND [{now}] SCHEDULE_FORCED_HOST_CHECK;{host};{now}
+        command = b'[{now}] SCHEDULE_FORCED_HOST_CHECK;{host};{now}'.format(
+                    now=now, host=host)
+        wait_timeout_sec = randint(1, 3)
+        request = b'''COMMAND {cmd}
 GET hosts
 WaitObject: {host}
 WaitCondition: last_check >= {last_check}
@@ -133,7 +137,7 @@ KeepAlive: on
 ResponseHeader: fixed16
 ColumnHeaders: true
 
-'''.format(last_check=now, localtime=now, host='test_host_0', now=now,
+'''.format(last_check=now, localtime=now, host=host, now=now, cmd=command,
            wait_timeout=wait_timeout_sec * 1000, # WaitTimeout header field is in millisecs
         )
 
@@ -145,7 +149,9 @@ ColumnHeaders: true
                         (wait_timeout_sec, response))
         goodresponse = "200          13\n[[0, 0, '']]\n"
         self.assertEqual(goodresponse, response)
-
+        data = self.livestatus_broker.from_q.get(block=False)
+        self.assertIsInstance(data, ExternalCommand)
+        self.assertEqual(command, data.cmd_line)
 
 
 if __name__ == '__main__':
