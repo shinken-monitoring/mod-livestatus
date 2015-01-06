@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from __future__ import division
 
@@ -45,6 +46,8 @@ ColumnHeaders: off
 
 class TestFull_WaitQuery(TestConfig):
     ''' "Full" test : that is with connection to livestatus socket
+    And so we have to start a thread to execute the actual main livestatus function (manage_lql_thread),
+    which will handle new connections as it would do in real life.
     '''
 
     def tearDown(self):
@@ -69,13 +72,10 @@ class TestFull_WaitQuery(TestConfig):
 
     def init_livestatus(self, conf):
         super(TestFull_WaitQuery, self).init_livestatus(conf)
-        self.sched.conf.skip_initial_broks = False
         self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
         self.sched.fill_initial_broks('Default-Broker')
         self.update_broker()
-        self.nagios_path = None
-        self.livestatus_path = None
-        self.nagios_config = None
+        # execute the livestatus by starting a dedicated thread to run the manage_lql_thread function:
         self.lql_thread = threading.Thread(target=self.livestatus_broker.manage_lql_thread, name='lqlthread')
         self.lql_thread.start()
         # wait for thread to init
@@ -105,28 +105,43 @@ class TestFull_WaitQuery(TestConfig):
 
 
     def test_wait_query_1(self):
+
+        ## NB NB NB:
+        # if there was a scheduler and a poller running and connected to `self.livestatus_broker.from_q´
+        # then the prepended command would be processed and the livestatus **could** return a different response,
+        # **depending** on :
+        # the wait_timeout_sec we use (which then should be greater than the randint(1,3) actually used)
+        # and on how fast the command would be processed by the poller
+        # and on how fast the host status would be updated after while within the livestatus process/thread.
+
         wait_timeout_sec = randint(1, 3)
-        now = int( time.time() ) # current livestatus wants a INTEGER value for WaitTimeout ..
-        request = b'''GET hosts
-WaitObject: test_host_0
+        now = int( time.time() ) # current livestatus wants an INTEGER value for WaitTimeout ..
+
+        # following request is nearly exactly what check_mk send (modulo the timestamps/hostname)
+        # when you reschedule an immediate host check :
+        request = b'''COMMAND [{now}] SCHEDULE_FORCED_HOST_CHECK;{host};{now}
+GET hosts
+WaitObject: {host}
 WaitCondition: last_check >= {last_check}
 WaitTimeout: {wait_timeout}
 WaitTrigger: check
 Columns: last_check state plugin_output
-Filter: host_name = test_host_0
+Filter: host_name = {host}
 Localtime: {localtime}
 OutputFormat: python
 KeepAlive: on
 ResponseHeader: fixed16
 ColumnHeaders: true
 
-'''.format(wait_timeout=wait_timeout_sec * 1000, last_check=now, localtime=now) # WaitTimeout header field is in millisecs
+'''.format(last_check=now, localtime=now, host='test_host_0', now=now,
+           wait_timeout=wait_timeout_sec * 1000, # WaitTimeout header field is in millisecs
+        )
 
         t0 = time.time()
         response = self.query_livestatus(request)
         t1 = time.time()
         self.assertLess(wait_timeout_sec, t1 - t0,
-                        '(in this specific case) WaitQuery should at least the requested WaitTimeout (%s sec) to complete ; response=%s' %
+                        '(actually and in this very specific case) livestatus should take at least the requested WaitTimeout (%s sec) to complete ; response=%s' %
                         (wait_timeout_sec, response))
         goodresponse = "200          13\n[[0, 0, '']]\n"
         self.assertEqual(goodresponse, response)
