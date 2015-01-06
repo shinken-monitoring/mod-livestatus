@@ -80,8 +80,16 @@ class TestFull_WaitQuery(TestConfig):
         # execute the livestatus by starting a dedicated thread to run the manage_lql_thread function:
         self.lql_thread = threading.Thread(target=self.livestatus_broker.manage_lql_thread, name='lqlthread')
         self.lql_thread.start()
-        # wait for thread to init
-        time.sleep(3)
+        t0 = time.time()
+        # give some time for the thread to init and creates its listener socket(s) :
+        while True:
+            if self.livestatus_broker.listeners:
+                break # but as soon as listeners is truth(== non-empty), we can continue,
+                # the listening thread has created the input socket so we can connect to it.
+            elif time.time() - t0 > 10:
+                self.livestatus_broker.interrupted = True
+                raise RuntimeError('Livestatus listening thread should have created its input socket(s) quite quickly !!')
+            time.sleep(0.5)
 
     def query_livestatus(self, data, ip=None, port=None, timeout=60):
         if ip is None:
