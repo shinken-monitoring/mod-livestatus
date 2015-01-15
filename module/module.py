@@ -153,6 +153,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.rg = LiveStatusRegenerator(self.service_authorization_strict, self.group_authorization_strict)
         self.client_connections = {} # keys will be socket of client, values are LiveStatusClientThread instances
         self.db = None
+        self.listeners = []
         self._listening_thread = threading.Thread(target=self._listening_thread_run)
 
     def add_compatibility_sqlite_module(self):
@@ -422,7 +423,7 @@ class LiveStatus_broker(BaseModule, Daemon):
         if self._listening_thread:
             self._listening_thread.join()
         # inputs must be closed after listening_thread
-        for s in self.input:
+        for s in self.listeners:
             full_safe_close(s)
         try:
             self.db.close()
@@ -432,7 +433,6 @@ class LiveStatus_broker(BaseModule, Daemon):
 
     def create_listeners(self):
         backlog = 5
-        self.listeners = []
         if self.port:
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.setblocking(0)
@@ -454,13 +454,12 @@ class LiveStatus_broker(BaseModule, Daemon):
             sock.listen(backlog)
             self.listeners.append(sock)
             logger.info("[Livestatus Broker] listening on unix socket: %s" % str(self.socket))
-        self.input = self.listeners[:]
 
 
     def _listening_thread_run(self):
         while not self.interrupted:
             # Check for pending livestatus requests
-            inputready, _, exceptready = select.select(self.input, [], [], 1)
+            inputready, _, exceptready = select.select(self.listeners, [], [], 1)
 
             if len(exceptready) > 0:
                 pass
@@ -509,6 +508,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # while updating
     def manage_lql_thread(self):
         logger.info("[Livestatus Broker] Livestatus query thread started")
+        self.db.open() # make sure to open the db in this thread..
         # This is the main object of this broker where the action takes place
         self.livestatus = LiveStatus(self.datamgr, self.query_cache, self.db, self.pnp_path, self.from_q)
         self.create_listeners()

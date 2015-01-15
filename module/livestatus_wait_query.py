@@ -227,8 +227,12 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         return result
 
     def condition_fulfilled(self):
-        # The result of launch_query is non-empty when an item matches the filter criteria
-        # We cannot return res, because in most cases it is a generator object, which always
-        # evaluates to a true value.
-        # In order to account for [] we must read the generator
-        return [x for x in self.launch_query()]
+        '''
+        :return: True if the WaitQuery condition is fulfilled.
+                 False otherwise.
+        The result of launch_query is non-empty when an item matches the filter criteria
+        '''
+
+        for _ in self.launch_query():
+            return True
+        return False

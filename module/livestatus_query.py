@@ -179,8 +179,11 @@ class LiveStatusQuery(object):
             elif keyword == 'Filter':
                 try:
                     _, attribute, operator, reference = self.split_option(line, 3)
-                except:
-                    _, attribute, operator, reference = self.split_option(line, 2) + ['']
+                except ValueError as err:
+                    try:
+                        _, attribute, operator, reference = self.split_option(line, 2) + ['']
+                    except ValueError as err:
+                        raise LiveStatusQueryError(452, 'invalid Filter header')
                 if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=', '!=~', '!~', '!~~']:
                     # Cut off the table name
                     attribute = self.strip_table_from_column(attribute)
@@ -273,6 +276,11 @@ class LiveStatusQuery(object):
                 logger.error("[Livestatus Query] Received a line of input which i can't handle: '%s'" % line)
                 pass
         self.metainfo = LiveStatusQueryMetainfo(data)
+
+    def process_query(self):
+        result = self.launch_query()
+        self.response.format_live_data(result, self.columns, self.aliases)
+        return self.response.respond()
 
     def launch_query(self):
         """ Prepare the request object's filter stacks """
