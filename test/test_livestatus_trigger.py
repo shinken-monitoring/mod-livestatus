@@ -59,11 +59,6 @@ class TestConfig(ShinkenModulesTest):
                 return True
         return False
 
-    def scheduler_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        super(TestConfig, self).scheduler_loop(count, reflist, do_sleep, sleep_time)
-        if self.nagios_installed() and hasattr(self, 'nagios_started'):
-            self.nagios_loop(1, reflist)
-
 
     def update_broker(self, dodeepcopy=False):
         # The brok should be manage in the good order
@@ -195,89 +190,6 @@ class TestConfig(ShinkenModulesTest):
                 newconfig.close()
         return new_configname
 
-    def start_nagios(self, config):
-        if os.path.exists('var/spool/checkresults'):
-            # Cleanup leftover checkresults
-            shutil.rmtree('var/spool/checkresults')
-        for dir in ['tmp', 'var/tmp', 'var/spool', 'var/spool/checkresults', 'var/archives']:
-            if not os.path.exists(dir):
-                os.mkdir(dir)
-        self.nagios_config = self.unshinkenize_config(config)
-        if os.path.exists('var/nagios.log'):
-            os.remove('var/nagios.log')
-        if os.path.exists('var/retention.dat'):
-            os.remove('var/retention.dat')
-        if os.path.exists('var/status.dat'):
-            os.remove('var/status.dat')
-        self.nagios_proc = subprocess.Popen([self.nagios_path, 'etc/shinken_' + self.nagios_config + '.cfg'], close_fds=True)
-        self.nagios_started = time.time()
-        time.sleep(2)
-
-    def stop_nagios(self):
-        if self.nagios_installed():
-            print "i stop nagios!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-            time.sleep(5)
-            if hasattr(self, 'nagios_proc'):
-                attempt = 1
-                while self.nagios_proc.poll() is None and attempt < 4:
-                    self.nagios_proc.terminate()
-                    attempt += 1
-                    time.sleep(1)
-                if self.nagios_proc.poll() is None:
-                    self.nagios_proc.kill()
-                if os.path.exists('etc/' + self.nagios_config):
-                    shutil.rmtree('etc/' + self.nagios_config)
-                if os.path.exists('etc/shinken_' + self.nagios_config + '.cfg'):
-                    os.remove('etc/shinken_' + self.nagios_config + '.cfg')
-
-    def ask_nagios(self, request):
-        if time.time() - self.nagios_started < 2:
-            time.sleep(1)
-        if not request.endswith("\n"):
-            request = request + "\n"
-        unixcat = subprocess.Popen([os.path.dirname(self.nagios_path) + '/' + 'unixcat', 'var/live'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        tic = time.clock()
-        out, err = unixcat.communicate(request)
-        tac = time.clock()
-        print "mklivestatus duration %f" % (tac - tic)
-        attempt = 1
-        while unixcat.poll() is None and attempt < 4:
-            unixcat.terminate()
-            attempt += 1
-            time.sleep(1)
-        if unixcat.poll() is None:
-            unixcat.kill()
-        print "unixcat says", out
-        return out
-
-    def nagios_loop(self, count, reflist, do_sleep=False, sleep_time=61):
-        now = time.time()
-        buffer = open('var/pipebuffer', 'w')
-        for ref in reflist:
-            (obj, exit_status, output) = ref
-            if obj.my_type == 'service':
-                cmd = "[%lu] PROCESS_SERVICE_CHECK_RESULT;%s;%s;%d;%s\n" % (now, obj.host_name, obj.service_description, exit_status, output)
-                print cmd
-                buffer.write(cmd)
-            else:
-                cmd = "[%lu] PROCESS_HOST_CHECK_RESULT;%s;%d;%s\n" % (now, obj.host_name, exit_status, output)
-                buffer.write(cmd)
-        buffer.close()
-        print "open pipe", self.conf.command_file
-        fifo = open('var/nagios.cmd', 'w')
-        cmd = "[%lu] PROCESS_FILE;%s;0\n" % (now, 'var/pipebuffer')
-        fifo.write(cmd)
-        fifo.flush()
-        fifo.close()
-        time.sleep(5)
-
-    def nagios_extcmd(self, cmd):
-        fifo = open('var/nagios.cmd', 'w')
-        fifo.write(cmd)
-        fifo.flush()
-        fifo.close()
-        time.sleep(5)
-
 
 @mock_livestatus_handle_request
 class TestConfigSmall(TestConfig):
@@ -298,7 +210,6 @@ class TestConfigSmall(TestConfig):
         self.nagios_config = None
 
     def tearDown(self):
-        self.stop_nagios()
         self.livestatus_broker.db.commit()
         self.livestatus_broker.db.close()
         if os.path.exists(self.livelogs):
@@ -315,8 +226,6 @@ class TestConfigSmall(TestConfig):
 
     def test_host_wait(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
