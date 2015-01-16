@@ -61,7 +61,6 @@ class LiveStatusTest(TestConfig):
         self.sched.brokers['Default-Broker'] = {'broks' : {}, 'has_full_broks' : False}
         self.sched.fill_initial_broks('Default-Broker')
         self.update_broker()
-        self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2
@@ -124,8 +123,6 @@ OutputFormat: csv
         self.assert_(response == goodresponse)
 
     def test_childs(self):
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         self.print_header()
         now = time.time()
         objlist = []
@@ -144,11 +141,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
+
         request = """GET hosts
 Columns: childs
 Filter: name = test_router_0
@@ -158,11 +152,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
+
 
     def test_nonsense(self):
         self.print_header()
@@ -260,8 +251,6 @@ ResponseHeader: off
         self.assert_(response == good_response)
 
     def test_servicesbyhostgroup(self):
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         self.print_header()
         now = time.time()
         objlist = []
@@ -280,11 +269,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         # Again, but without filter
         request = """GET servicesbyhostgroup
@@ -295,16 +280,10 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
     def test_hostsbygroup(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -324,16 +303,10 @@ ResponseHeader: fixed16
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
     def test_delegate_to_host(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -372,8 +345,6 @@ Filter: host_state != 0
 
     def test_status(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -392,12 +363,7 @@ Filter: host_state != 0
         request = 'GET hosts'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # todo 1 != 1.0000000000e+00
-            #self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         #---------------------------------------------------------------
         # get only the host names and addresses
@@ -405,11 +371,7 @@ Filter: host_state != 0
         request = 'GET hosts\nColumns: name address groups\nColumnHeaders: on'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         #---------------------------------------------------------------
         # query_1
@@ -417,14 +379,7 @@ Filter: host_state != 0
         request = 'GET contacts'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'query_1_______________\n%s\n%s\n' % (request, response)
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # There are some sick columns in the livestatus response like
-            # modified_attributes;modified_attributes_list
-            # These are not implemented in shinken-livestatus (never, i think)
-            #self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         #---------------------------------------------------------------
         # query_2
@@ -432,11 +387,7 @@ Filter: host_state != 0
         request = 'GET contacts\nColumns: name alias'
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print 'query_2_______________\n%s\n%s\n' % (request, response)
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         #---------------------------------------------------------------
         # query_3
@@ -502,12 +453,6 @@ Filter: host_state != 0
         self.assert_(isinstance(pyresponse[0][0][0], basestring))
         self.assert_(isinstance(pyresponse[0][1][0], basestring))
 
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # TODO looks like a timing problem with nagios
-            #self.assert_(self.lines_equal(response, nagresponse))
 
     def test_modified_attributes(self):
         host = self.sched.hosts.find_by_name("test_host_0")
@@ -575,8 +520,6 @@ Filter: description = test_ok_0
 
     def test_thruk(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -668,23 +611,14 @@ Separators: 10 59 44 124
 ResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # TODO timing problem?
-            #self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         request = """GET comments
 Columns: host_name source type author comment entry_time entry_type expire_time
 Filter: service_description ="""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         request = """GET hosts
 Columns: comments has_been_checked state name address acknowledged notifications_enabled active_checks_enabled is_flapping scheduled_downtime_depth is_executing notes_url_expanded action_url_expanded icon_image_expanded icon_image_alt last_check last_state_change plugin_output next_check long_plugin_output
@@ -698,13 +632,9 @@ ResponseHeader: fixed16"""
         cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_warning_00;%d;%d;0;0;%d;lausser;blablubsvc" % (now, now, now + duration, duration)
         print cmd
         self.sched.run_external_command(cmd)
-        if self.nagios_installed():
-            self.nagios_extcmd(cmd)
         cmd = "[%lu] SCHEDULE_HOST_DOWNTIME;test_host_0;%d;%d;0;0;%d;lausser;blablubhost" % (now, now, now + duration, duration)
         print cmd
         self.sched.run_external_command(cmd)
-        if self.nagios_installed():
-            self.nagios_extcmd(cmd)
         self.update_broker()
         self.scheduler_loop(1, [[svc, 0, 'OK']])
         self.update_broker()
@@ -718,14 +648,7 @@ Separators: 10 59 44 124"""
         print response
         expected = "lausser;blablubhost;"
         self.assertEqual(expected, response[:len(expected)])
-        if self.nagios_installed():
-            #time.sleep(10)
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # TODO the entry_times are different. find a way to round the numbers
-            # so that they are equal
-            #self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         request = """GET comments
 Filter: service_description =
@@ -734,12 +657,7 @@ Separators: 10 59 44 124
 ResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            time.sleep(10)
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            #self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         request = """GET services
 Filter: has_been_checked = 1
@@ -773,30 +691,17 @@ ResponseHeader: fixed16"""
         request = """GET hostgroups\nColumnHeaders: on\nResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            # TODO members_with_state
-            #self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         request = """GET hosts\nColumns: name groups\nColumnHeaders: on\nResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         request = """GET hostgroups\nColumns: name num_services num_services_ok\nColumnHeaders: on\nResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         request = """GET hostgroups\nColumns: name num_services_pending num_services_ok num_services_warn num_services_crit num_services_unknown worst_service_state worst_service_hard_state\nColumnHeaders: on\nResponseHeader: fixed16"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
@@ -824,8 +729,6 @@ ResponseHeader: fixed16"""
 
     def test_thruk_config(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         host = self.sched.hosts.find_by_name("test_host_0")
         host.checks_in_progress = []
@@ -1186,8 +1089,6 @@ And: 2"""
 
     def test_thruk_tac_svc(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         self.update_broker()
 
         start = time.time()
@@ -1242,11 +1143,8 @@ Stats: max execution_time"""
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        # nagios comparison makes no sense, because the latencies/execution times will surely differ
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-        #    print nagresponse
-        #    self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
+
 
     def test_columns(self):
         self.print_header()
@@ -1257,6 +1155,7 @@ Stats: max execution_time"""
         request = """GET columns"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
+        # TODO
 
     def test_scheduler_table(self):
         self.print_header()
@@ -1527,8 +1426,6 @@ test_host_0/test_ok_0,test_host_0;test_router_0
 
     def test_limit(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('1r_1h_1s')
         now = time.time()
         self.update_broker()
         #---------------------------------------------------------------
@@ -1550,11 +1447,6 @@ test_router_0
         # it must be test_host_0 because with Limit: the output is
         # alphabetically ordered
         self.assert_(response == good_response)
-        # TODO look whats wrong
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-        #    print nagresponse
-        #    self.assert_(self.lines_equal(response, nagresponse))
 
     def test_problem_impact_in_host_service(self):
         self.print_header()
@@ -2229,7 +2121,7 @@ Stats: state != 0
 OutputFormat: csv
 Limit: 1001"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print "response", response
+        print "response=%r" % response
         self.assert_(self.contains_line(response, 'test_host_0;;1;3;0;0;3'))
         self.assert_(self.contains_line(response, 'test_router_0;;1;4;0;0;4'))
         self.assert_(self.contains_line(response, 'test_host_0;test_ok_0;1;2;1;0;3'))
@@ -2295,7 +2187,6 @@ class TestConfigComplex(TestConfig):
         self.sched.fill_initial_broks('Default-Broker')
 
         self.update_broker()
-        self.nagios_path = None
         self.livestatus_path = None
         self.nagios_config = None
         # add use_aggressive_host_checking so we can mix exit codes 1 and 2

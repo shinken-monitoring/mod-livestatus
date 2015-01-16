@@ -260,8 +260,7 @@ KeepAlive: on
         sys.stdout = old_stdout
 
         range = int(len(self.sched.hosts) / 2)
-        request = """
-GET hosts
+        request = """GET hosts
 """
         request += """Filter: host_name = %s
 """ % (self.host_format % range,)

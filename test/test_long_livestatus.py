@@ -202,8 +202,6 @@ OutputFormat: python
 
     def test_stats(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -238,15 +236,9 @@ Stats: state = 3"""
         print 'query_6_______________\n%s\n%s\n' % (request, response)
         self.assert_(response == '2000;1993;3;3;1\n')
 
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
     def test_statsgroupby(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -288,15 +280,9 @@ StatsGroupBy: state
         self.assert_(self.contains_line(response, '1;3'))
         self.assert_(self.contains_line(response, '2;3'))
         self.assert_(self.contains_line(response, '3;1'))
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
 
     def test_hostsbygroup(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -315,15 +301,10 @@ ResponseHeader: fixed16
 
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
     def test_servicesbyhostgroup(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
@@ -402,10 +383,7 @@ ResponseHeader: fixed16
         tac = time.clock()
         print "livestatus duration %f" % (tac - tic)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
         # Again, without Filter:
         request = """GET servicesbyhostgroup
@@ -474,14 +452,9 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
     def test_childs(self):
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         self.print_header()
         now = time.time()
         objlist = []
@@ -500,11 +473,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
+
         request = """GET hosts
 Columns: childs
 Filter: name = test_router_0
@@ -556,8 +526,6 @@ OutputFormat: csv
 
     def test_sorted_limit(self):
         self.print_header()
-        if self.nagios_installed():
-            self.start_nagios('5r_100h_2000s')
         now = time.time()
         objlist = []
         for host in self.sched.hosts:
