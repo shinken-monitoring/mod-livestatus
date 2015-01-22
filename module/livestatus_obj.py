@@ -70,9 +70,9 @@ class LiveStatus(object):
             counters = LiveStatusCounters()
         self.counters = counters
 
-    def handle_request(self, data):
+    def handle_request(self, data, process_commands=True):
         try:
-            return self.handle_request_and_fail(data)
+            return self.handle_request_and_fail(data, process_commands=process_commands)
         except LiveStatusQueryError as err:
             # LiveStatusQueryError(404, table)
             # LiveStatusQueryError(450, column)
@@ -92,7 +92,7 @@ class LiveStatus(object):
             response.responseheader = 'fixed16'
         return response.respond()
 
-    def handle_request_and_fail(self, data):
+    def handle_request_and_fail(self, data, process_commands=True):
         """Execute the livestatus request.
 
         This function creates a LiveStatusRequest instance, calls the parser,
@@ -113,7 +113,8 @@ class LiveStatus(object):
             # as they are sorted alphabetically, once we get one which isn't a 'command'..
             if query.my_type != 'command': #  then we are done.
                 break
-            query.process_query()
+            if process_commands:
+                query.process_query()
             # according to Check_Mk:
             # COMMAND don't require a response, that is no response or more simply: an empty response:
             output = ''

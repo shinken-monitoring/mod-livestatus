@@ -9,6 +9,7 @@ import errno
 import select
 import copy
 import traceback
+from multiprocessing import Process
 
 from shinken.log import logger
 
@@ -66,6 +67,7 @@ class LiveStatusClientThread(threading.Thread):
         self.logger = logger
         self.last_query_time = None
         self.n_requests = 0 # number of requests received
+        self.sub_proc = None # subprocess for handling the connection
 
     def __str__(self):
         return 'livestatus-th-%s nr=%s' % (self.ident, self.n_requests)
@@ -211,13 +213,53 @@ class LiveStatusClientThread(threading.Thread):
         return output
 
 
+    def handle_request_with_dedicated_process(self, request):
+        # we have, for now, to :
+        # reopen the connection to the database,
+        # and re-parse the request because handle_request returns a generator connected to the db
+        self.livestatus.db.open()
+        response, _ = self.livestatus.handle_request(request, process_commands=False)
+        self.send_response(response)
+        # return in the loop reading and handling new requests :
+        self.run(reopen_db=False)
+
     def handle_request(self, request_data):
         response, _ = self.livestatus.handle_request(request_data)
-
         try:
             if not isinstance(response, (LiveStatusListResponse, type(b''))):
                 # must be a wait query..
+                if self.sub_proc is not None:
+                    # we are already in a subprocess,
+                    logger.warning("I got a Wait-Query but I'm already in a subprocess ; "
+                                   "for now the wait-query will inevitably times out !")
+                    pass  # TODO :
+                    # we must give the request back to the livestatus main thread/process.
+                    # something like :
+                    #
+                    #   self.livestatus_main_process_queue.put( (self, response) )
+                    #   self.stop_requested = True
+                    #   return
+                    #
+                    # we give self too so that the main thread/process knows from what connection this comes from.
+                    #
+                else:
+                    pass
                 response = self.handle_wait_query(*response)
+            else:
+                if self.sub_proc is None:
+                    # we are not yet in a subprocess
+                    # we can so launch one to continue to process this connection/request :
+                    proc = self.sub_proc = Process(target=self.handle_request_with_dedicated_process, args=(request_data,))
+                    proc.start()
+                    # we wait on the process:
+                    while proc.is_alive():
+                        time.sleep(1)
+                        if self.stop_requested:
+                            proc.terminate()
+                    proc.join()
+                    # to make us also stop in run():
+                    self.stop_requested = True
+                    return
             if response:
                 self.send_response(response)
         except LiveStatusQueryError as err:
@@ -229,9 +271,10 @@ class LiveStatusClientThread(threading.Thread):
             output, _ = response.respond()
             self.send_response(output)
 
-    def run(self):
+    def run(self, reopen_db=True):
         assert isinstance(self.livestatus, LiveStatus)
-        self.livestatus.db.open()
+        if reopen_db:
+            self.livestatus.db.open()
         try:
             while not self.stop_requested: # self.stop_requested is(SHOULD BE) checked in all our inner loops
                 request_bytes = self.read_request()
