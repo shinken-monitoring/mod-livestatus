@@ -123,15 +123,6 @@ class TestConfig(ShinkenModulesTest):
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
 
-    def nagios_installed(self, path='/usr/local/nagios/bin/nagios', livestatus='/usr/local/nagios/lib/mk-livestatus/livestatus.o'):
-        return False
-        raise
-        if os.path.exists(path) and os.access(path, os.X_OK) and os.path.exists(livestatus):
-            self.nagios_path = path
-            self.livestatus_path = livestatus
-            return True
-        else:
-            return False
 
     # shinkenize_nagios_config('nagios_1r_1h_1s')
     # We assume that there is a nagios_1r_1h_1s.cfg and a nagios_1r_1h_1s directory for the objects

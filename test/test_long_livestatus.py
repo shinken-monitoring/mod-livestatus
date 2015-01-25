@@ -484,11 +484,7 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        if self.nagios_installed():
-            nagresponse = self.ask_nagios(request)
-            print "nagresponse----------------------------------------------"
-            print nagresponse
-            self.assert_(self.lines_equal(response, nagresponse))
+        # TODO
 
     def test_thruk_servicegroup(self):
         self.print_header()
