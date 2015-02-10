@@ -105,7 +105,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
             elif keyword == 'WaitCondition':
                 try:
                     _, attribute, operator, reference = self.split_option(line, 3)
-                except:
+                except Exception:
                     _, attribute, operator, reference = self.split_option(line, 2) + ['']
                 if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
                     # We need to set columns, if not columnheaders will be set to "on"

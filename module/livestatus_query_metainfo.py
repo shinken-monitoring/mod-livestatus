@@ -225,7 +225,7 @@ class LiveStatusQueryMetainfo(object):
             elif keyword == 'Filter':
                 try:
                     _, attribute, operator, reference = re.split(r"[\s]+", line, 3)
-                except:
+                except Exception:
                     _, attribute, operator = re.split(r"[\s]+", line, 2)
                     reference = ''
                 self.metainfo_filter_stack.put_stack(self.make_text_filter(operator, attribute, reference))
@@ -254,7 +254,7 @@ class LiveStatusQueryMetainfo(object):
                     elif attribute in ['sum', 'min', 'max', 'avg', 'std'] and reference == '=':
                         attribute, operator = operator, attribute
                         reference = ''
-                except:
+                except Exception:
                     _, attribute, operator = self.split_option(line, 3)
                     if attribute in ['sum', 'min', 'max', 'avg', 'std']:
                         attribute, operator = operator, attribute

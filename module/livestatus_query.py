@@ -238,7 +238,7 @@ class LiveStatusQuery(object):
                         # Workaround for thruk-cmds like: Stats: sum latency =
                         attribute, operator = operator, attribute
                         reference = ''
-                except:
+                except Exception:
                     _, attribute, operator = self.split_option(line, 3)
                     if attribute in ['sum', 'min', 'max', 'avg', 'std']:
                         attribute, operator = operator, attribute
