@@ -79,7 +79,7 @@ Stats: state = 2
 Stats: state = 3"""
         response, keepalive = self.livestatus_broker.livestatus.handle_request(statsrequest)
         print 'query_6_______________\n%s\n%s\n' % (statsrequest, response)
-        self.assert_(response == '2000;1993;3;3;1\n')
+        self.assertEqual('2000;1993;3;3;1\n', response )
 
         # Now we play with the cache
         afterresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
@@ -87,7 +87,7 @@ Stats: state = 3"""
         self.assert_(beforeresponse != afterresponse)
         repeatedresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "repeated", repeatedresponse
-        self.assert_(afterresponse == repeatedresponse)
+        self.assertEqual(repeatedresponse, afterresponse )
 
         self.scheduler_loop(2, [[svc5, 2, 'C']])
         self.update_broker()
@@ -102,7 +102,7 @@ Stats: state = 3"""
         self.assert_(notcachedresponse != againnotcachedresponse)
         finallycachedresponse, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print "finallycached", finallycachedresponse
-        self.assert_(againnotcachedresponse == finallycachedresponse)
+        self.assertEqual(finallycachedresponse, againnotcachedresponse )
 
         request = """GET services
 Filter: contacts >= test_contact
@@ -115,7 +115,7 @@ Stats: state = 3"""
         print 'query_6_______________\n%s\n%s\n' % (statsrequest, response)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(statsrequest)
         print 'query_6_______________\n%s\n%s\n' % (statsrequest, response)
-        self.assert_(response == '2000;1994;3;3;0\n')
+        self.assertEqual('2000;1994;3;3;0\n', response )
 
     def test_a_long_history(self):
         #return
@@ -285,7 +285,7 @@ OutputFormat: json"""
         tac = time.time()
         elapsed2 = tac - tic
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == should_be)
+        self.assertEqual(should_be, len(pyresponse) )
         print "clear the cache"
         print "use aggressive sql"
         print "query 3 --------------------------------------------------"
@@ -296,14 +296,14 @@ OutputFormat: json"""
         tac = time.time()
         elapsed3 = tac - tic
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == should_be)
+        self.assertEqual(should_be, len(pyresponse))
         print "query 4 cache---------------------------------------------"
         tic = time.time()
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         tac = time.time()
         elapsed4 = tac - tic
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == should_be)
+        self.assertEqual(should_be, len(pyresponse))
         print "elapsed1", elapsed1
         print "elapsed2", elapsed2
         print "elapsed3", elapsed3

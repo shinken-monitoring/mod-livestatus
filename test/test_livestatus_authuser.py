@@ -108,30 +108,30 @@ www2    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
         print "rg is", self.livestatus_broker.datamgr.rg.hosts._id_contact_heap
         allhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__()])
         print allhosts
-        self.assert_(allhosts == ["dbsrv1", "dbsrv2", "dbsrv3", "dbsrv4", "dbsrv5", "www1", "www2"])
+        self.assertEqual(["dbsrv1", "dbsrv2", "dbsrv3", "dbsrv4", "dbsrv5", "www1", "www2"], allhosts )
         hint = {"target": 0, "authuser": "oradba1"}
         orahosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__(hint)])
         print orahosts
-        self.assert_(orahosts == [u"dbsrv3"])
+        self.assertEqual([u"dbsrv3"], orahosts )
         hint = {"target": 0, "authuser": "mydba2"}
         myhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__(hint)])
         print myhosts
-        self.assert_(myhosts == ["dbsrv4", "dbsrv5"])
+        self.assertEqual(["dbsrv4", "dbsrv5"], myhosts )
         print "rg is", self.livestatus_broker.datamgr.rg.services
         print "rg is", self.livestatus_broker.datamgr.rg.services._id_contact_heap
         # unknown user
         hint = {"target": 0, "authuser": "adm0"}
         admservices = sorted([s.get_full_name() for s in self.livestatus_broker.datamgr.rg.services.__itersorted__(hint)])
-        self.assert_(len(admservices) == 0)
+        self.assertEqual(0, len(admservices) )
         # known user which is a contact to all hosts
         hint = {"target": 0, "authuser": "adm1"}
         admservices = sorted([s.get_full_name() for s in self.livestatus_broker.datamgr.rg.services.__itersorted__(hint)])
-        self.assert_(len(admservices) == 15) #all services
+        self.assertEqual(15, len(admservices) ) #all services
         hint = {"target": 0, "authuser": "bill"} # bill->www2->windows
         print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
         winhosts = sorted([s.get_name() for s in self.livestatus_broker.datamgr.rg.hostgroups.__itersorted__(hint)])
         print winhosts
-        self.assert_(winhosts == ["windows"])
+        self.assertEqual(["windows"], winhosts )
         print "rg is", self.livestatus_broker.datamgr.rg.hostgroups
         self.livestatus_broker.datamgr.rg.group_authorization_strict = False
         self.livestatus_broker.datamgr.rg.all_done_linking(1)
@@ -165,7 +165,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 1)
+        self.assertEqual(1, len(pyresponse) )
         self.assert_("dbsrv3" in [h[0] for h in pyresponse])
 
         request = """GET hosts
@@ -178,7 +178,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 3)
+        self.assertEqual(3, len(pyresponse) )
         self.assert_("dbsrv3" in [h[0] for h in pyresponse])
         self.assert_("dbsrv5" in [h[0] for h in pyresponse])
         self.assert_("www2" in [h[0] for h in pyresponse])
@@ -206,7 +206,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse[0][1]) == 3)
+        self.assertEqual(3, len(pyresponse[0][1]) )
         self.assert_("app_web_apache_check_http" in pyresponse[0][1])
         self.assert_("app_web_apache_check_errorlog" in pyresponse[0][1])
         self.assert_("os_windows_check_autosvc" in pyresponse[0][1])
@@ -222,7 +222,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 0)
+        self.assertEqual(0, len(pyresponse) )
 
         request = """GET hosts
 AuthUser: cc1
@@ -239,7 +239,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse) == 0)
+        self.assertEqual(0, len(pyresponse) )
 
         request = """GET services
 AuthUser: cc1
@@ -253,7 +253,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse[0]) == 1)
+        self.assertEqual(1, len(pyresponse[0]) )
         self.assert_("app_web_apache_check_http" in pyresponse[0][0])
 
         request = """GET services
@@ -267,7 +267,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse) == 7)
+        self.assertEqual(7, len(pyresponse) )
 
     def test_service_authorization_strict(self):
         self.print_header()
@@ -300,7 +300,7 @@ KeepAlive: on
         #    print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.hosts._id_contact_heap[contact])
         #    here we see in fact, that bill is only contact to www2/os_windows_check_autosvc
         #    print "%-10s %s" % (contact, self.livestatus_broker.datamgr.rg.services._id_contact_heap[contact])
-        self.assert_(len(pyresponse[0][1]) == 3)
+        self.assertEqual(3, len(pyresponse[0][1]) )
         self.assert_("app_web_apache_check_http" in pyresponse[0][1])
         self.assert_("app_web_apache_check_errorlog" in pyresponse[0][1])
         self.assert_("os_windows_check_autosvc" in pyresponse[0][1])
@@ -319,7 +319,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse[0]) == 1)
+        self.assertEqual(1, len(pyresponse[0]) )
         self.assert_("os_windows_check_autosvc" in pyresponse[0][0])
 
         request = """GET hosts
@@ -333,7 +333,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 0)
+        self.assertEqual(0, len(pyresponse) )
 
         request = """GET hosts
 AuthUser: cc1
@@ -350,7 +350,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse) == 0)
+        self.assertEqual(0, len(pyresponse) )
 
         request = """GET services
 AuthUser: cc1
@@ -364,7 +364,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse[0]) == 1)
+        self.assertEqual(1, len(pyresponse[0]) )
         self.assert_("app_web_apache_check_http" in pyresponse[0][0])
 
         request = """GET services
@@ -378,7 +378,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse) == 7)
+        self.assertEqual(7, len(pyresponse) )
 
         request = """GET services
 AuthUser: adm1
@@ -392,7 +392,7 @@ KeepAlive: on
         print response
         pyresponse = eval(response)
         print pyresponse
-        self.assert_(len(pyresponse) == 1)
+        self.assertEqual(1, len(pyresponse) )
 
     def test_group_authorization_strict(self):
         self.print_header()
@@ -424,8 +424,8 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 1)
-        self.assert_(pyresponse[0][0] == "windows")
+        self.assertEqual(1, len(pyresponse) )
+        self.assertEqual("windows", pyresponse[0][0] )
         request = """GET hostgroups
 AuthUser: web1
 Columns: name members
@@ -436,8 +436,8 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 1)
-        self.assert_(pyresponse[0][0] == "web")
+        self.assertEqual(1, len(pyresponse) )
+        self.assertEqual("web", pyresponse[0][0] )
         request = """GET hostgroups
 AuthUser: adm1
 Columns: name members
@@ -448,7 +448,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 6)
+        self.assertEqual(6, len(pyresponse) )
 
         print "now check servicesbygroup"
         request = """GET servicesbygroup
@@ -537,7 +537,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        #self.assert_(len(pyresponse) == 1)
+        #self.assertEqual(1, len(pyresponse) )
 
         request = """GET hostgroups
 AuthUser: web1
@@ -549,7 +549,7 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 4)
+        self.assertEqual(4, len(pyresponse) )
 
 
 if __name__ == '__main__':

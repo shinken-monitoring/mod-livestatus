@@ -161,12 +161,12 @@ KeepAlive: on
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == real_services)
+        self.assertEqual(real_services, len(pyresponse) )
         request += """Filter: host_name !=
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == real_services)
+        self.assertEqual(real_services, len(pyresponse) )
 
     def test_check_hint_services_by_hosts(self):
         self.print_header()
@@ -198,13 +198,13 @@ KeepAlive: on
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == range * self.services_per_host)
+        self.assertEqual(range * self.services_per_host, len(pyresponse) )
 
         request += """Filter: host_name !=
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == range * self.services_per_host)
+        self.assertEqual(range * self.services_per_host, len(pyresponse) )
 
 
     def test_check_hint_services_by_host(self):
@@ -235,13 +235,13 @@ KeepAlive: on
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == self.services_per_host)
+        self.assertEqual(self.services_per_host, len(pyresponse) )
 
         request += """Filter: host_name !=
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == self.services_per_host)
+        self.assertEqual(self.services_per_host, len(pyresponse) )
 
 
     def test_check_hint_hosts_by_host(self):
@@ -271,13 +271,13 @@ KeepAlive: on
         #response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 1)
+        self.assertEqual(1, len(pyresponse) )
 
         request += """Filter: host_name !=
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 1)
+        self.assertEqual(1, len(pyresponse) )
 
     def test_check_hint_services_by_hostgroup(self):
         self.print_header()
@@ -306,14 +306,14 @@ KeepAlive: on
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         print len(pyresponse)
-        self.assert_(len(pyresponse) == 2 * self.services_per_host)
+        self.assertEqual(2 * self.services_per_host, len(pyresponse) )
 
         request += """Filter: host_name !=
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
         print len(pyresponse)
-        self.assert_(len(pyresponse) == 2 * self.services_per_host)
+        self.assertEqual(2 * self.services_per_host, len(pyresponse) )
 
     def test_check_hint_hosts_by_hostgroup(self):
         self.print_header()
@@ -339,14 +339,14 @@ KeepAlive: on
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 2)
+        self.assertEqual(2, len(pyresponse) )
 
         request += """Filter: host_name !=
 """
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 2)
+        self.assertEqual(2, len(pyresponse) )
 
 
     def test_check_hint_servicesbyhostgroup(self):
@@ -376,14 +376,14 @@ KeepAlive: on
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == allgroups * self.services_per_host)
+        self.assertEqual(allgroups * self.services_per_host, len(pyresponse) )
 
         request += """Filter: host_name !=
 """
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == allgroups * self.services_per_host)
+        self.assertEqual(allgroups * self.services_per_host, len(pyresponse) )
 
     def test_check_hint_hostsbygroup(self):
         self.print_header()
@@ -410,13 +410,13 @@ KeepAlive: on
 #ResponseHeader: fixed16
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == allgroups)
+        self.assertEqual(allgroups, len(pyresponse) )
 
         request += """Filter: host_name !=
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == allgroups)
+        self.assertEqual(allgroups, len(pyresponse) )
 
     def test_check_hint_services_by_servicegroup(self):
         self.print_header()
@@ -444,13 +444,13 @@ KeepAlive: on
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 2)
+        self.assertEqual(2, len(pyresponse) )
 
         request += """Filter: service_description !=
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == 2)
+        self.assertEqual(2, len(pyresponse) )
 
     def test_check_hint_servicesbygroup(self):
         self.print_header()
@@ -480,14 +480,14 @@ KeepAlive: on
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == allgroups)
+        self.assertEqual(allgroups, len(pyresponse) )
 
         request += """Filter: service_description !=
 """
         print request
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         pyresponse = eval(response)
-        self.assert_(len(pyresponse) == allgroups)
+        self.assertEqual(allgroups, len(pyresponse) )
 
 
 """TODO
