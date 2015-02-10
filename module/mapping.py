@@ -39,11 +39,11 @@ from shinken.objects.command import Command
 from shinken.objects.config import Config
 from shinken.downtime import Downtime
 from shinken.comment import Comment
-from shinken.schedulerlink import SchedulerLink
-from shinken.reactionnerlink import ReactionnerLink
-from shinken.brokerlink import BrokerLink
-from shinken.receiverlink import ReceiverLink
-from shinken.pollerlink import PollerLink
+from shinken.objects.schedulerlink import SchedulerLink
+from shinken.objects.reactionnerlink import ReactionnerLink
+from shinken.objects.brokerlink import BrokerLink
+from shinken.objects.receiverlink import ReceiverLink
+from shinken.objects.pollerlink import PollerLink
 from shinken.log import logger
 
 from log_line import LOGCLASS_INFO, LOGCLASS_ALERT, LOGCLASS_PROGRAM, LOGCLASS_NOTIFICATION, LOGCLASS_PASSIVECHECK, LOGCLASS_COMMAND, LOGCLASS_STATE, LOGCLASS_INVALID, LOGCLASS_ALL, LOGOBJECT_INFO, LOGOBJECT_HOST, LOGOBJECT_SERVICE, LOGOBJECT_CONTACT, Logline, LoglineWrongFormat

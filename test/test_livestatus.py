@@ -38,10 +38,10 @@ from shinken.brok import Brok
 from shinken.objects.timeperiod import Timeperiod
 from shinken.comment import Comment
 from shinken.util import from_bool_to_int
-from shinken.schedulerlink import SchedulerLink
-from shinken.reactionnerlink import ReactionnerLink
-from shinken.pollerlink import PollerLink
-from shinken.brokerlink import BrokerLink
+from shinken.objects.schedulerlink import SchedulerLink
+from shinken.objects.reactionnerlink import ReactionnerLink
+from shinken.objects.pollerlink import PollerLink
+from shinken.objects.brokerlink import BrokerLink
 
 from shinken_modules import TestConfig
 
