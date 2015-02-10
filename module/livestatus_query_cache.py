@@ -22,11 +22,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Shinken.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
-import time
+
 from heapq import nsmallest
 from operator import itemgetter
-from livestatus_query_metainfo import LiveStatusQueryMetainfo, CACHE_IMPOSSIBLE, CACHE_PROGRAM_STATIC, CACHE_GLOBAL_STATS, CACHE_GLOBAL_STATS_WITH_STATETYPE, CACHE_HOST_STATS, CACHE_SERVICE_STATS, CACHE_IRREVERSIBLE_HISTORY
+from livestatus_query_metainfo import (
+    CACHE_IMPOSSIBLE, CACHE_GLOBAL_STATS, CACHE_GLOBAL_STATS_WITH_STATETYPE, CACHE_SERVICE_STATS
+)
 from counter import Counter
 from shinken.log import logger
 
@@ -71,7 +72,9 @@ class LFU(object):
     def put(self, key, data):
         self.storage[key] = data
         if len(self.storage) > self.maxsize:
-            for key, _ in nsmallest(self.maxsize // 10, self.use_count.iteritems(), key=itemgetter(1)):
+            for key, _ in nsmallest(self.maxsize // 10,
+                                    self.use_count.iteritems(),
+                                    key=itemgetter(1)):
                 del self.storage[key], self.use_count[key]
         pass
 
@@ -134,18 +137,29 @@ class LiveStatusQueryCache(object):
         """
         if not self.enabled:
             return (False, False, [])
-        logger.debug("[Livestatus Broker Query Cache] I search the cache for categories %s with key %s and data %s" % (str(query.cache_category), str(query.key), str(query.data)))
+        logger.debug("[Livestatus Broker Query Cache] I search the cache "
+                     "for categories %s with key %s and data %s",
+                     str(query.cache_category), str(query.key), str(query.data))
         try:
-            return (query.cache_category != CACHE_IMPOSSIBLE, True, self.categories[query.cache_category].get(query.key))
+            return (
+                query.cache_category != CACHE_IMPOSSIBLE,
+                True,
+                self.categories[query.cache_category].get(query.key)
+            )
         except LFUCacheMiss:
-            return (query.cache_category != CACHE_IMPOSSIBLE, False, [])
+            return (
+                query.cache_category != CACHE_IMPOSSIBLE,
+                False,
+                []
+            )
 
     def cache_query(self, query, result):
         """Puts the result of a livestatus query (metainfo) into the cache."""
 
         if not self.enabled:
             return
-        logger.info("[Livestatus Broker Query Cache] I put in the cache for %s with key %s" % (str(query.cache_category), str(query.key)))
+        logger.info("[Livestatus Broker Query Cache] I put in the cache for %s with key %s",
+                    str(query.cache_category), str(query.key))
         self.categories[query.cache_category].put(query.key, result)
 
     def impact_assessment(self, brok, obj):
@@ -157,13 +171,18 @@ class LiveStatusQueryCache(object):
             return
         try:
             if brok.data['state_id'] != obj.state_id:
-                logger.info("[Livestatus Broker Query Cache] Detected statechange: %s" % str(obj))
+                logger.info("[Livestatus Broker Query Cache] Detected statechange: %s", str(obj))
                 self.invalidate_category(CACHE_GLOBAL_STATS)
                 self.invalidate_category(CACHE_SERVICE_STATS)
             if brok.data['state_type_id'] != obj.state_type_id:
-                logger.info("[Livestatus Broker Query Cache] Detected statetypechange: %s" % str(obj))
+                logger.info("[Livestatus Broker Query Cache] Detected statetypechange: %s",
+                            str(obj))
                 self.invalidate_category(CACHE_GLOBAL_STATS_WITH_STATETYPE)
                 self.invalidate_category(CACHE_SERVICE_STATS)
-            logger.debug("[Livestatus Broker Query Cache] Obj State id: %d and State type id: %d, Data state id: %d abd state type id: %d" % (obj.state_id, obj.state_type_id, brok.data['state_id'], brok.data['state_type_id']))
+            logger.debug("[Livestatus Broker Query Cache] Obj State id: %d and State type id: %d, "
+                         "Data state id: %d abd state type id: %d",
+                         obj.state_id, obj.state_type_id,
+                         brok.data['state_id'], brok.data['state_type_id'])
         except Exception:
+            # TODO : Hey don't do that !
             pass
