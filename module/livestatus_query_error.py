@@ -8,4 +8,3 @@ class LiveStatusQueryError(Exception):
         452: 'Completely invalid GET request \'%s\'',
         500: 'Internal server error: %r',
     }
-

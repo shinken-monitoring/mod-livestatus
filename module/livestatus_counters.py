@@ -76,7 +76,10 @@ class LiveStatusCounters:  # (LiveStatus):
                     if self.rate[counter] == 0:
                         avg_rate = new_rate
                     else:
-                        avg_rate = self.rate[counter] * (1 - self.rating_weight) + new_rate * self.rating_weight
+                        avg_rate = (
+                            (1 - self.rating_weight) * self.rate[counter]
+                            + new_rate * self.rating_weight
+                        )
                     self.rate[counter] = avg_rate
                     self.last_counters[counter] = self.counters[counter]
 

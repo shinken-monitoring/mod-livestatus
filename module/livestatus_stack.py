@@ -74,9 +74,11 @@ class LiveStatusStack(TopBaseLiveStatusStack):
 
     def __xinit__(self, *args, **kw):
         self.type = 'lambda'
-        logger.info("[Livestatus Stack] I am a %s" % type(self))
-        logger.info("[Livestatus Stack] My parents are %s" % str([c.__name__ for c in self.__class__.__bases__]))
-        logger.info("[Livestatus Stack] My first parent is %s", str(self.__class__.__bases__[0].__name__))
+        logger.info("[Livestatus Stack] I am a %s", type(self))
+        logger.info("[Livestatus Stack] My parents are %s",
+                    str([c.__name__ for c in self.__class__.__bases__]))
+        logger.info("[Livestatus Stack] My first parent is %s",
+                    str(self.__class__.__bases__[0].__name__))
         if self.__class__.__name__ == 'LiveStatusStack':
             self.__class__.__bases__[0].__init__(self, *args, **kw)
 
@@ -142,11 +144,12 @@ class LiveStatusStack(TopBaseLiveStatusStack):
 
 
 try:
+    # TODO: clean/fix this hack :
     Queue.LifoQueue
     TopBaseLiveStatusStack.__bases__ = (Queue.LifoQueue, object)
-    #LiveStatusStack.__bases__ += (Queue.LifoQueue, )
+    # LiveStatusStack.__bases__ += (Queue.LifoQueue, )
 except AttributeError:
     # Python 2.4 and 2.5 do not have it.
     # Use our own implementation.
     TopBaseLiveStatusStack.__bases__ = (MyLifoQueue, object)
-    #LiveStatusStack.__bases__ += (MyLifoQueue, )
+    # LiveStatusStack.__bases__ += (MyLifoQueue, )

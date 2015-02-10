@@ -57,7 +57,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
             # a space following the:
-            if ':' in line and not ' ' in line:
+            if ':' in line and ' ' not in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
             if keyword == 'GET':  # Get the name of the base table
@@ -100,20 +100,22 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                     # In the future there might be more lookup-tables
             elif keyword == 'WaitTrigger':
                 _, self.wait_trigger = self.split_option(line)
-                if self.wait_trigger not in ['check', 'state', 'log', 'downtime', 'comment', 'command']:
+                if self.wait_trigger not in ('check', 'state', 'log',
+                                             'downtime', 'comment', 'command'):
                     self.wait_trigger = 'all'
             elif keyword == 'WaitCondition':
                 try:
                     _, attribute, operator, reference = self.split_option(line, 3)
                 except Exception:
                     _, attribute, operator, reference = self.split_option(line, 2) + ['']
-                if operator in ['=', '>', '>=', '<', '<=', '=~', '~', '~~', '!=', '!>', '!>=', '!<', '!<=']:
+                if operator in ('=', '>', '>=', '<', '<=', '=~', '~',
+                                '~~', '!=', '!>', '!>=', '!<', '!<='):
                     # We need to set columns, if not columnheaders will be set to "on"
                     self.columns.append(attribute)
                     # Cut off the table name
                     attribute = self.strip_table_from_column(attribute)
                     # Some operators can simply be negated
-                    if operator in ['!>', '!>=', '!<', '!<=']:
+                    if operator in ('!>', '!>=', '!<', '!<='):
                         operator = {'!>': '<=', '!>=': '<', '!<': '>=', '!<=': '>'}[operator]
                     # Put a function on top of the filter_stack which implements
                     # the desired operation
@@ -123,7 +125,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                     if self.table == 'log':
                         self.db.add_filter(operator, attribute, reference)
                 else:
-                    logger.warning("[Livestatus Wait Query] Illegal operation: %s" % str(operator))
+                    logger.warning("[Livestatus Wait Query] Illegal operation: %s", str(operator))
                     pass  # illegal operation
             elif keyword == 'WaitConditionAnd':
                 _, andnum = self.split_option(line)
@@ -146,7 +148,8 @@ class LiveStatusWaitQuery(LiveStatusQuery):
                 self.wait_timeout = int(self.wait_timeout) / 1000
             else:
                 # This line is not valid or not implemented
-                logger.warning("[Livestatus Wait Query] Received a line of input which i can't handle: '%s'" % line)
+                logger.warning("[Livestatus Wait Query] Received a line of input "
+                               "which i can't handle: '%s'", line)
                 pass
         # Make columns unique
         self.filtercolumns = list(set(self.filtercolumns))
@@ -155,7 +158,7 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         # Make one big filter where the single filters are anded
         self.filter_stack.and_elements(self.filter_stack.qsize())
 
-        #if self.table == 'log':
+        # if self.table == 'log':
         #    self.sql_filter_stack.and_elements(self.sql_filter_stack.qsize())
 
         self.metainfo = LiveStatusQueryMetainfo(metafilter)
@@ -178,7 +181,8 @@ class LiveStatusWaitQuery(LiveStatusQuery):
             else:
                 # If the pnpgraph_present column is involved, then check
                 # with each request if the pnp perfdata path exists
-                if 'pnpgraph_present' in self.columns + self.filtercolumns + self.prefiltercolumns and self.pnp_path and os.access(self.pnp_path, os.R_OK):
+                if ('pnpgraph_present' in self.columns + self.filtercolumns + self.prefiltercolumns
+                        and self.pnp_path and os.access(self.pnp_path, os.R_OK)):
                     self.pnp_path_readable = True
                 else:
                     self.pnp_path_readable = False
@@ -205,7 +209,8 @@ class LiveStatusWaitQuery(LiveStatusQuery):
         # Filter: host_groups >= linux-servers
         # host_groups is a service attribute
         # We can get all services of all hosts of all hostgroups and filter at the end
-        # But it would save a lot of time to already filter the hostgroups. This means host_groups must be hard-coded
+        # But it would save a lot of time to already filter the hostgroups.
+        # This means host_groups must be hard-coded.
         # Also host_name, but then we must filter the second step.
         # And a mixture host_groups/host_name with FilterAnd/Or? Must have several filter functions
 

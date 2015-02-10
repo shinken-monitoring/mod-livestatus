@@ -61,7 +61,7 @@ class LiveStatusRequest:
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
             # a space following the:
-            if ':' in line and not ' ' in line:
+            if ':' in line and ' ' not in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
             if len(line) == 0:
@@ -69,7 +69,8 @@ class LiveStatusRequest:
             elif keyword in ('GET',):
                 query_cmds.append(line)
                 wait_cmds.append(line)
-            elif keyword in ('WaitObject', 'WaitCondition', 'WaitConditionOr', 'WaitConditionAnd', 'WaitTrigger', 'WaitTimeout'):
+            elif keyword in ('WaitObject', 'WaitCondition', 'WaitConditionOr',
+                             'WaitConditionAnd', 'WaitTrigger', 'WaitTimeout'):
                 wait_cmds.append(line)
             elif keyword in ('COMMAND',):
                 external_cmds.append(line)
@@ -77,14 +78,17 @@ class LiveStatusRequest:
                 query_cmds.append(line)
         if len(external_cmds) > 0:
             for external_cmd in external_cmds:
-                query = LiveStatusCommandQuery(self.datamgr, self.query_cache, self.db, self.pnp_path, self.return_queue, self.counters)
+                query = LiveStatusCommandQuery(self.datamgr, self.query_cache, self.db,
+                                               self.pnp_path, self.return_queue, self.counters)
                 query.parse_input(external_cmd)
                 self.queries.append(query)
         if len(wait_cmds) > 1:
-            query = LiveStatusWaitQuery(self.datamgr, self.query_cache, self.db, self.pnp_path, self.return_queue, self.counters)
+            query = LiveStatusWaitQuery(self.datamgr, self.query_cache, self.db,
+                                        self.pnp_path, self.return_queue, self.counters)
             query.parse_input('\n'.join(wait_cmds))
             self.queries.append(query)
         if len(query_cmds) > 0:
-            query = LiveStatusQuery(self.datamgr, self.query_cache, self.db, self.pnp_path, self.return_queue, self.counters)
+            query = LiveStatusQuery(self.datamgr, self.query_cache, self.db,
+                                    self.pnp_path, self.return_queue, self.counters)
             query.parse_input('\n'.join(query_cmds))
             self.queries.append(query)

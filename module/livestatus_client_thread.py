@@ -28,13 +28,19 @@ class LiveStatusClientError(Exception):
 
 class Error:
 
-    class ClientError(LiveStatusClientError):       pass
-    class ClientReadError(LiveStatusClientError):   pass
-    class ClientWriteError(LiveStatusClientError):  pass
-    class ClientTimeout(LiveStatusClientError):     pass
+    class ClientError(LiveStatusClientError):
+        pass
+    class ClientReadError(LiveStatusClientError):
+        pass
+    class ClientWriteError(LiveStatusClientError):
+        pass
+    class ClientTimeout(LiveStatusClientError):
+        pass
     class ClientLeft(LiveStatusClientError):
         ''' When we try to read a request from the client but it has closed its connection '''
-    class Interrupted(LiveStatusClientError):       pass
+
+    class Interrupted(LiveStatusClientError):
+        pass
 
     client_error = ClientError('Error on communication channel')
     client_left = ClientLeft('Client closed connection')
@@ -46,8 +52,12 @@ class LiveStatusClientThread(threading.Thread):
     ''' A LiveStatus Client Thread will handle a full LS client connection.
     '''
     def __init__(self, client_sock, client_address, livestatus_broker):
-        #from .livestatus_broker import LiveStatus_broker
-        #assert isinstance(livestatus_broker, LiveStatus_broker)
+        '''
+        :param client_sock: The socket instance of the client.
+        :param client_address:  The address of the client.
+        :param livestatus_broker:
+        :type livestatus_broker: .livestatus_broker.LiveStatus_broker
+        '''
         super(LiveStatusClientThread, self).__init__()
         self.client_sock = client_sock
         self.client_address = client_address
@@ -65,10 +75,10 @@ class LiveStatusClientThread(threading.Thread):
         self.write_timeout = self.read_timeout = 90  # TODO: use parameters from somewhere..
         self.logger = logger
         self.last_query_time = None
-        self.n_requests = 0 # number of requests received
+        self.requests_received = 0  # number of requests received
 
     def __str__(self):
-        return 'livestatus-th-%s nr=%s' % (self.ident, self.n_requests)
+        return 'livestatus-th-%s nr=%s' % (self.ident, self.requests_received)
 
     def get_request(self):
         ''' Try to get the next request available in our input buffer.
@@ -88,11 +98,11 @@ class LiveStatusClientThread(threading.Thread):
             if endline >= 0:
                 for di in range(idx):
                     del self.buffer_list[0]
-                self.buffer_list[0] = self.buffer_list[0][endline+sz:]
+                self.buffer_list[0] = self.buffer_list[0][endline + sz:]
                 if not self.buffer_list[0]:
                     del self.buffer_list[0]
-                self.n_requests += 1
-                return buf[:endline+sz]
+                self.requests_received += 1
+                return buf[:endline + sz]
         return None
 
     def _read(self, size=RECV_SIZE):
@@ -102,7 +112,8 @@ class LiveStatusClientThread(threading.Thread):
         try:
             data = self.client_sock.recv(size)
         except socket.error as err:
-            if err.args[0] == errno.EWOULDBLOCK: # but should not happen as we are in non-blocking mode..
+            if err.args[0] == errno.EWOULDBLOCK:
+                # but should not happen as we are in non-blocking mode..
                 return b''
             else:
                 raise Error.ClientReadError('Could not read from client: %s' % err)
@@ -116,10 +127,10 @@ class LiveStatusClientThread(threading.Thread):
         :return: a full bytes buffer which should contain a valid LiveStatus request
         '''
 
-        fds = [ self.client_sock ]
+        fds = [self.client_sock]
         timeout_time = time.time() + self.read_timeout
 
-        request = self.get_request() # there can be already buffered request
+        request = self.get_request()  # there can be already buffered request
         if request is not None:
             return request
 
@@ -131,16 +142,19 @@ class LiveStatusClientThread(threading.Thread):
                 try:
                     data = self._read()
                 except Error.ClientLeft:
-                    # very special case : if we already got some data,
+                    # special case : if we already got some data,
                     # AND it ends by a '\n' :
-                    if self.buffer_list and self.buffer_list[-1] and self.buffer_list[-1][-1] == '\n':
+                    if (self.buffer_list and self.buffer_list[-1]
+                            and self.buffer_list[-1][-1] == '\n'):
                         # then try to consider it as a valid query
-                        self.logger.warn("Have a query not fully terminated but input closed by remote side.. "
-                                        "Let's consider this as a valid query and try process it..")
+                        self.logger.warn(
+                            "Have a query not fully terminated but input closed by remote side.. "
+                            "Let's consider this as a valid query and try process it..")
                         ret = b''.join(self.buffer_list)
                         del self.buffer_list[:]
                         return ret
-                    raise # otherwise simply let the ClientLeft propagate.
+                    # otherwise simply let the ClientLeft propagate:
+                    raise
 
                 self.buffer_list.append(data)
                 request = self.get_request()
@@ -157,7 +171,7 @@ class LiveStatusClientThread(threading.Thread):
     def _send_data(self, data):
         if not data:
             return
-        fds = [ self.client_sock ]
+        fds = [self.client_sock]
         total_sent = 0
         len_data = len(data)
         timeout_time = time.time() + self.write_timeout
@@ -173,7 +187,8 @@ class LiveStatusClientThread(threading.Thread):
             try:
                 sent = self.client_sock.send(data[total_sent:])
             except socket.error as err:
-                if err.args[0] == errno.EWOULDBLOCK: # but should not happen as we are in non-blocking mode..
+                if err.args[0] == errno.EWOULDBLOCK:
+                    # but should not happen as we are in non-blocking mode..
                     continue
                 else:
                     raise Error.ClientWriteError('Could not send response: %s' % err)
@@ -189,7 +204,7 @@ class LiveStatusClientThread(threading.Thread):
 
     def send_response(self, response):
         if not isinstance(response, LiveStatusListResponse):
-            response = [ response ]
+            response = [response]
         for data in response:
             self._send_data(data)
 
@@ -233,28 +248,29 @@ class LiveStatusClientThread(threading.Thread):
         assert isinstance(self.livestatus, LiveStatus)
         self.livestatus.db.open()
         try:
-            while not self.stop_requested: # self.stop_requested is(SHOULD BE) checked in all our inner loops
+            while not self.stop_requested:
+                # note: self.stop_requested is(SHOULD BE) checked in all our inner loops
                 request_bytes = self.read_request()
                 self.handle_request(request_bytes)
         except Error.Interrupted:
             pass
         except Error.ClientLeft as err:
             if self.buffer_list:
-                self.logger.error('Client left while some data remaining in input buffer: %s' % err)
+                self.logger.error('Client left while some data remaining in input buffer: %s', err)
         except LiveStatusClientError as err:
-            self.logger.error('LiveStatusClientError: %s' % err)
+            self.logger.error('LiveStatusClientError: %s', err)
         except Exception as err:
-            self.logger.error('Unexpected error: %s ; traceback: %s' % (err, traceback.format_exc()))
+            self.logger.error('Unexpected error: %s ; traceback: %s', err, traceback.format_exc())
         finally:
             try:
                 self.client_sock.shutdown(socket.SHUT_RDWR)
             except Exception as err:
-                self.logger.warning('Error on client socket shutdown: %s' % err)
+                self.logger.warning('Error on client socket shutdown: %s', err)
             try:
                 self.client_sock.close()
             except Exception as err:
-                self.logger.warning('Error on client socket close: %s' % err)
+                self.logger.warning('Error on client socket close: %s', err)
             try:
                 self.livestatus.db.close()
             except Exception as err:
-                self.logger.warning('Error on close database: %s' % err)
+                self.logger.warning('Error on close database: %s', err)

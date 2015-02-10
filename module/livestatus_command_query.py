@@ -42,14 +42,15 @@ class LiveStatusCommandQuery(LiveStatusQuery):
             line = line.strip()
             # Tools like NagVis send KEYWORK:option, and we prefer to have
             # a space following the:
-            if ':' in line and not ' ' in line:
+            if ':' in line and ' ' not in line:
                 line = line.replace(':', ': ')
             keyword = line.split(' ')[0].rstrip(':')
             if keyword == 'COMMAND':
                 _, self.extcmd = line.split(' ', 1)
             else:
                 # This line is not valid or not implemented
-                logger.warning("[Livestatus Broker Command Query] Received a line of input which i can't handle: '%s'" % line)
+                logger.warning("[Livestatus Broker Command Query] Received a line of input "
+                               "which i can't handle: '%s'" % line)
                 pass
 
     def launch_query(self):
@@ -60,9 +61,10 @@ class LiveStatusCommandQuery(LiveStatusQuery):
 
         if self.extcmd:
             # External command are send back to broker
-            
-            # Somehow this line seems to prevent us from sending external commands from THruk with accents.
-            #self.extcmd = self.extcmd.decode('utf8', 'replace')
+            # TODO: check and clean this:
+            # Somehow this line seems to prevent us from sending external
+            # commands from THruk with accents:
+            # self.extcmd = self.extcmd.decode('utf8', 'replace')
             e = ExternalCommand(self.extcmd)
             self.return_queue.put(e)
             return []
