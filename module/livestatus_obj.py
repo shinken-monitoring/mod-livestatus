@@ -33,18 +33,17 @@ from .livestatus_request import LiveStatusRequest
 from .livestatus_response import LiveStatusResponse
 from .livestatus_query_error import LiveStatusQueryError
 
-# from .livestatus_query import LiveStatusQuery
-
 
 _VALID_QUERIES_TYPE_SORTED = (
-# used in handle_request() to validate the components we get in one query/request.
-# each inner tuple is sorted alphabetically: command < query < wait
-    ( 'command', ), # there can be multiple commands also, special cased below..
-    ( 'query', ),
-    ( 'query', 'wait' ),
-    ( 'command', 'query' ),
-    ( 'command', 'query', 'wait' ),
+    # used in handle_request() to validate the components we get in one query/request.
+    # each inner tuple is sorted alphabetically: command < query < wait
+    ('command', ),  # there can be multiple commands also, special cased below..
+    ('query', ),
+    ('query', 'wait', ),
+    ('command', 'query', ),
+    ('command', 'query', 'wait', ),
 )
+
 
 def _is_valid_queries(queries_type):
     assert isinstance(queries_type, tuple)
@@ -98,24 +97,28 @@ class LiveStatus(object):
         This function creates a LiveStatusRequest instance, calls the parser,
         handles the execution of the request and formatting of the result.
         """
-        request = LiveStatusRequest(data, self.datamgr, self.query_cache, self.db, self.pnp_path, self.return_queue, self.counters)
+        request = LiveStatusRequest(data, self.datamgr, self.query_cache, self.db,
+                                    self.pnp_path, self.return_queue, self.counters)
         request.parse_input(data)
-        queries = sorted(request.queries, key=lambda q: q.my_type) # sort alphabetically on the query type
-        queries_type = tuple(query.my_type for query in queries) # have to tuple it for testing with 'in' :
+        # sort alphabetically on the query type :
+        queries = sorted(request.queries, key=lambda q: q.my_type)
+        # have to tuple it for testing with 'in' in _is_valid_queries() just after:
+        queries_type = tuple(query.my_type for query in queries)
         if not _is_valid_queries(queries_type):
-            logger.error("[Livestatus] We currently do not handle this kind of composed request: %s" % queries_type)
+            logger.error("[Livestatus] We currently do not handle this kind "
+                         "of composed request: %s", queries_type)
             return '', False
 
         cur_idx = 0
         keepalive = False
 
-        for query in queries: # process the command(s), if any.
+        for query in queries:  # process the command(s), if any.
             # as they are sorted alphabetically, once we get one which isn't a 'command'..
-            if query.my_type != 'command': #  then we are done.
-                break
+            if query.my_type != 'command':
+                break   # then we are done.
             query.process_query()
-            # according to Check_Mk:
-            # COMMAND don't require a response, that is no response or more simply: an empty response:
+            # according to Check_Mk, COMMAND doesn't require a response (argh!),
+            # that is no response or more simply: an empty response:
             output = ''
             cur_idx += 1
 
