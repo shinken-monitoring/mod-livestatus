@@ -313,9 +313,9 @@ NB NB NB: This isn't necessarily a failure !!! This check highly depends on the 
 Maybe you could relaunch the test and it will succeed.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
-        self.assert_(elapsed2 < elapsed1 / 10, msg)
-        self.assert_(elapsed3 < elapsed1, msg)
-        self.assert_(elapsed4 < elapsed3, msg)
+        self.assertLess(elapsed2*0.9, elapsed1, msg)
+        self.assertLess(elapsed3*0.9, elapsed1, msg)
+        self.assertLess(elapsed4*0.9, elapsed3, msg)
 
         time_hacker.set_my_time()
 
