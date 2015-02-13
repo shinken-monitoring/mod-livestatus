@@ -147,7 +147,7 @@ class LiveStatusClientThread(threading.Thread):
                     if (self.buffer_list and self.buffer_list[-1]
                             and self.buffer_list[-1][-1] == '\n'):
                         # then try to consider it as a valid query
-                        self.logger.warn(
+                        self.logger.debug(
                             "Have a query not fully terminated but input closed by remote side.. "
                             "Let's consider this as a valid query and try process it..")
                         ret = b''.join(self.buffer_list)
