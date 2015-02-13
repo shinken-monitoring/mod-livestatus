@@ -11,9 +11,10 @@ install:
   - if [[ $TRAVIS_PYTHON_VERSION == 2.6 ]]; then pip install --use-mirrors -r requirements-py26.txt ; fi
 
 script:
-  - cd ~/shinken/test
-  - export PYTHONPATH=~/shinken
-  - nosetests -vx --process-restartworker  --processes=1 --process-timeout=1800
+  - cur_dir=$PWD
+  - export PYTHONPATH=$PWD/test/tmp/shinken
+  - cd test/tmp/shinken/test
+  - nosetests -vx --process-restartworker  --processes=1 --process-timeout=1800 "$cur_dir/test"
   - coverage combine
 
 after_success:
