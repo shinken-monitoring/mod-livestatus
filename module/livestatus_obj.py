@@ -133,6 +133,8 @@ class LiveStatus(object):
                 and query == queries[cur_idx] and query.my_type == 'query'
             )
             output, keepalive = query.process_query()
+        else:
+            output = ''  # no command, query, or anything could be parsed from the input data.
 
         logger.debug("[Livestatus] Request duration %.4fs" % (time.time() - request.tic))
         return output, keepalive
