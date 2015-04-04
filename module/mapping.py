@@ -1726,7 +1726,7 @@ livestatus_attribute_map = {
         },
         'host_notification_period': {
             'description': 'The time period in which the contact will be notified about host problems',
-            'function': lambda item, req: item.host_notification_period,
+            'function': lambda item, req: item.host_notification_period.get_name(),
         },
         'host_notifications_enabled': {
             'description': 'Whether the contact will be notified about host problems in general (0/1)',
@@ -1763,7 +1763,7 @@ livestatus_attribute_map = {
         },
         'service_notification_period': {
             'description': 'The time period in which the contact will be notified about service problems',
-            'function': lambda item, req: item.service_notification_period,
+            'function': lambda item, req: item.service_notification_period.get_name(),
         },
         'service_notifications_enabled': {
             'description': 'Whether the contact will be notified about service problems in general (0/1)',
