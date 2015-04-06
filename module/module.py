@@ -437,7 +437,11 @@ class LiveStatus_broker(BaseModule, Daemon):
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             server.setblocking(0)
             if hasattr(socket, 'SO_REUSEPORT'):
-                server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+                try:
+                    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+                except socket.error as err:
+                    logger.warning("Can't set SO_REUSEPORT on socket: %s, "
+                                   "is it an old kernel ?", err)
             server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             server.bind((self.host, self.port))
             server.listen(backlog)
