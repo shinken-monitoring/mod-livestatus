@@ -44,6 +44,7 @@ from shinken.pollerlink import PollerLink
 from shinken.brokerlink import BrokerLink
 
 from shinken_modules import TestConfig
+from shinken_modules import LiveStatusClientThread
 
 from mock_livestatus import mock_livestatus_handle_request
 
@@ -71,6 +72,13 @@ class LiveStatusTest(TestConfig):
 
 @mock_livestatus_handle_request
 class TestConfigSmall(LiveStatusTest):
+
+    def test_get_request_encoding(self):
+        self.print_header()
+        lqt = LiveStatusClientThread(None, None, self.livestatus_broker)
+        lqt.buffer_list = [b'testééé\n\n']
+        output = lqt.get_request()
+        self.assertEqual(b"testééé\n\n", output)
 
     def test_check_type(self):
         self.print_header()
