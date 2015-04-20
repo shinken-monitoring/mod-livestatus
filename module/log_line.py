@@ -64,7 +64,9 @@ class Logline(dict):
                 else:
                     setattr(self, col[0], sqlite_row[idx])
         elif line != None:
-            line = line.encode('UTF-8').rstrip()
+            if isinstance(line, unicode):
+                line = line.encode('UTF-8').rstrip()
+
             # [1278280765] SERVICE ALERT: test_host_0
             if line[0] != '[' and line[11] != ']':
                 logger.warning("[Livestatus Log Lines] Invalid line: %s" % line)

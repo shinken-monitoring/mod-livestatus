@@ -90,10 +90,10 @@ class LiveStatusClientThread(threading.Thread):
         buf = b''
         for idx, data in enumerate(self.buffer_list):
             buf += data
-            endline = buf.find('\n\n')
+            endline = buf.find(b'\n\n')
             sz = 2
             if endline < 0:
-                endline = buf.find('\r\n\r\n')
+                endline = buf.find(b'\r\n\r\n')
                 sz = 4
             if endline >= 0:
                 for di in range(idx):
