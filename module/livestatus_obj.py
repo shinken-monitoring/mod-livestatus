@@ -68,6 +68,7 @@ class LiveStatus(object):
         if counters is None:
             counters = LiveStatusCounters()
         self.counters = counters
+        self.batch_size = 8192
 
     def handle_request(self, data):
         try:

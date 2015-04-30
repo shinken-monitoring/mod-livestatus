@@ -204,9 +204,10 @@ class LiveStatusClientThread(threading.Thread):
 
     def send_response(self, response):
         if not isinstance(response, LiveStatusListResponse):
-            response = [response]
-        for data in response:
-            self._send_data(data)
+            response = [[response]]
+        for bulk in response:
+            for data in bulk:
+                self._send_data(data)
 
     def request_stop(self):
         self.stop_requested = True

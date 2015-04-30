@@ -58,15 +58,19 @@ Separators = namedtuple('Separators',
 class LiveStatusListResponse(list):
     ''' A class to be able to recognize list of data/bytes to be sent vs plain data/bytes. '''
 
+    def __init__(self, batch_size=8192):
+        self.batch_size = batch_size
+
     def __iter__(self):
         '''Iter over the values and eventual sub-values. This so also
 recursively iter of the values of eventual sub-LiveStatusListResponse. '''
-        for value in super(LiveStatusListResponse, self).__iter__():
-            if isinstance(value, (LiveStatusListResponse, GeneratorType)):
-                for v2 in value:
-                    yield v2
-            else:
-                yield value
+        for values in super(LiveStatusListResponse, self).__iter__():
+            res = []
+            for value in values:
+                if isinstance(value, (LiveStatusListResponse, GeneratorType)):
+                    res.extend(value)
+                else:
+                    res.append(value)
 
     def total_len(self):
         '''
@@ -77,17 +81,18 @@ generator value at its index in this list.
         '''
         tot = 0
         for idx in range(len(self)):
-            value = self[idx]
-            if isinstance(value, GeneratorType):
-                newlist = LiveStatusListResponse()
-                for generated_data in value:
-                    newlist.append(generated_data)
-                    tot += len(generated_data)
-                self[idx] = newlist
-            elif isinstance(value, LiveStatusListResponse):
-                tot += value.total_len()
-            else:
-                tot += len(value)
+            values = self[idx]
+            for value in values:
+                if isinstance(value, GeneratorType):
+                    newlist = LiveStatusListResponse()
+                    for generated_data in value:
+                        newlist.append(generated_data)
+                        tot += len(generated_data)
+                    self[idx] = newlist
+                elif isinstance(value, LiveStatusListResponse):
+                    tot += value.total_len()
+                else:
+                    tot += len(value)
         return tot
 
     def clean(self):
@@ -112,14 +117,16 @@ class LiveStatusResponse:
 
     separators = Separators('\n', ';', ',', '|')
 
-    def __init__(self, responseheader='off', outputformat='csv', keepalive='off', columnheaders='off', separators=separators):
+    def __init__(self, responseheader='off', outputformat='csv',
+                 keepalive='off', columnheaders='off', separators=separators,
+                 batch_size=8192):
         self.responseheader = responseheader
         self.outputformat = outputformat
         self.keepalive = keepalive
         self.columnheaders = columnheaders
         self.separators = separators
         self.statuscode = 200
-        self.output = LiveStatusListResponse()
+        self.output = LiveStatusListResponse(batch_size=batch_size)
 
     def __str__(self):
         output = "LiveStatusResponse:\n"

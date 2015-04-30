@@ -69,7 +69,8 @@ class LiveStatusQuery(object):
 
     my_type = 'query'
 
-    def __init__(self, datamgr, query_cache, db, pnp_path, return_queue, counters):
+    def __init__(self, datamgr, query_cache, db, pnp_path, return_queue,
+                 counters, batch_size=8192):
         # Runtime data form the global LiveStatus object
         self.datamgr = datamgr
         self.query_cache = query_cache
@@ -79,7 +80,7 @@ class LiveStatusQuery(object):
         self.counters = counters
 
         # Private attributes for this specific request
-        self.response = LiveStatusResponse()
+        self.response = LiveStatusResponse(batch_size=batch_size)
         self.authuser = None
         self.table = None
         self.columns = []
@@ -609,16 +610,25 @@ class LiveStatusQuery(object):
         return output
 
     def _get_live_data_log(self, cs):
+        res = []
+        count = 0
         for x in self.db.get_live_data_log():
+            if count > self.response.output.batch_size:
+                if res:
+                    yield res
+                    res = []
             z = x.fill(self.datamgr)
             if cs.without_filter or cs.filter_func(z):
-                yield z
+                res.append(z)
+        if res:
+            yield res
 
     def get_live_data_log(self, cs):
         '''
         :param cs: The `LiveStatusConstraints´ instance to use for the live data logs.
         :return: a generator which yields logs matching the given "cs" constraints.
         '''
+
         items = self._get_live_data_log(cs)
         if self.limit:
             items = gen_limit(items, self.limit)
