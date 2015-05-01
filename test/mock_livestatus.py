@@ -31,7 +31,11 @@ def mocked_livestatus_handle_request(self, request_data):
         if 'fixed16' in request_data:
             response.responseheader = 'fixed16'
         response, keepalive = response.respond()
-        response = ''.join(response)
+        rsp_list = []
+        lists = list(response)
+        for sublist in lists:
+            rsp_list.extend(sublist)
+        response = ''.join(rsp_list)
     return response, keepalive
 #
 # could have also mocked the LiveStatus class itself but then
