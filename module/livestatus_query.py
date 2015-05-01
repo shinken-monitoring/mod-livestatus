@@ -680,11 +680,16 @@ class LiveStatusQuery(object):
             # It is a dict with the statsgroupyby: as key
             groupedresult = {}
             for elem in filtresult:
-                # Make a tuple consisting of the stats_group_by values
-                stats_group_by_values = tuple([getattr(elem, 'lsm_'+c)(self) for c in self.stats_group_by])
-                if not stats_group_by_values in groupedresult:
-                    groupedresult[stats_group_by_values] = []
-                groupedresult[stats_group_by_values].append(elem)
+                if isinstance(elem, list):
+                    lelem = elem
+                else:
+                    lelem = [elem]
+                for elem in lelem:
+                    # Make a tuple consisting of the stats_group_by values
+                    stats_group_by_values = tuple([getattr(elem, 'lsm_'+c)(self) for c in self.stats_group_by])
+                    if not stats_group_by_values in groupedresult:
+                        groupedresult[stats_group_by_values] = []
+                    groupedresult[stats_group_by_values].append(elem)
             for group in groupedresult:
                 # All possible combinations of stats_group_by values. group is a tuple
                 resultdict[group] = dict(zip(self.stats_group_by, group))
