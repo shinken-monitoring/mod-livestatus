@@ -611,12 +611,10 @@ class LiveStatusQuery(object):
 
     def _get_live_data_log(self, cs):
         res = []
-        count = 0
         for x in self.db.get_live_data_log():
-            if count > self.response.output.batch_size:
-                if res:
-                    yield res
-                    res = []
+            if len(res) > self.response.output.batch_size:
+                yield res
+                res = []
             z = x.fill(self.datamgr)
             if cs.without_filter or cs.filter_func(z):
                 res.append(z)
