@@ -64,13 +64,21 @@ class LiveStatusListResponse(list):
     def __iter__(self):
         '''Iter over the values and eventual sub-values. This so also
 recursively iter of the values of eventual sub-LiveStatusListResponse. '''
+        res = []
         for values in super(LiveStatusListResponse, self).__iter__():
-            res = []
-            for value in values:
-                if isinstance(value, (LiveStatusListResponse, GeneratorType)):
-                    res.extend(value)
-                else:
-                    res.append(value)
+            if len(res) > self.batch_size:
+                yield res
+                res = []
+            if isinstance(values, str):
+                res.append(values)
+            else:
+                for value in values:
+                    if isinstance(value, (list, LiveStatusListResponse, GeneratorType)):
+                        res.extend(value)
+                    else:
+                        res.append(value)
+        if res:
+            yield res
 
     def total_len(self):
         '''
