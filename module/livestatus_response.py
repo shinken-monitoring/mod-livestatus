@@ -89,18 +89,18 @@ generator value at its index in this list.
         '''
         tot = 0
         for idx in range(len(self)):
-            values = self[idx]
-            for value in values:
-                if isinstance(value, GeneratorType):
-                    newlist = LiveStatusListResponse()
-                    for generated_data in value:
-                        newlist.append(generated_data)
-                        tot += len(generated_data)
-                    self[idx] = newlist
-                elif isinstance(value, LiveStatusListResponse):
-                    tot += value.total_len()
-                else:
-                    tot += len(value)
+            value = self[idx]
+            if isinstance(value, LiveStatusListResponse):
+                tot += value.total_len()
+            elif isinstance(value, (GeneratorType, list)):
+                newlist = LiveStatusListResponse()
+                newlist.extend(value)
+                #for generated_data in value:
+                #    newlist.append(generated_data)
+                tot += newlist.total_len()
+                self[idx] = newlist
+            else:
+                tot += len(value)
         return tot
 
     def clean(self):
@@ -218,6 +218,8 @@ class LiveStatusResponse:
     def make_live_data_generator2(self, result, columns, aliases):
         assert self.outputformat in self._format_2_value_handler
 
+        cur_res = []
+
         if not isinstance(result, GeneratorType):
             result = iter(result)
 
@@ -230,31 +232,41 @@ class LiveStatusResponse:
             # we output all columns.
 
         headers = list((aliases[col] for col in columns)
-                        if len(aliases)
-                        else columns)
+                       if len(aliases)
+                       else columns)
         headers = row_handler(self, headers)
 
         has_no_item = False
         try:
-            item = next(result)
+            items = next(result)
         except StopIteration:
             has_no_item = True
+        else:
+            if not isinstance(items, list):
+                items = [items]
+            item = items[0]
+            del items[0]
 
         if self.outputformat != 'csv':
             showheader = self.columnheaders == 'on'
-        else: # csv has a somehow more complicated showheader rule than json or python..
+        else:  # csv has a somehow more complicated showheader rule than json or python..
             showheader = (
-            (has_no_item and self.columnheaders == 'on')
-                or (not has_no_item and (self.columnheaders != 'off'
-                                     or not query_with_columns)))
+                (has_no_item and self.columnheaders == 'on')
+                or (not has_no_item
+                    and (self.columnheaders != 'off'
+                         or not query_with_columns)))
 
         line_nr = 0
         if showheader:
-            yield headers
+            # yield headers
+            cur_res.append(headers)
             line_nr += 1
         if has_no_item:
             if showheader:
-                yield self.separators.line
+                cur_res.append(self.separators.line)
+                #yield self.separators.line
+            if cur_res:
+                yield cur_res
             return
 
         #for item in result: # little trick, can you see it ? (hint: item)
@@ -275,26 +287,47 @@ class LiveStatusResponse:
                         value = ''
                 l.append(row_item_handler(self, value))
 
-            yield row_handler(self, l, line_nr)
+            cur_res.append( row_handler(self, l, line_nr) )
+            if len(cur_res) > self.output.batch_size:
+                yield cur_res
+                cur_res = []
 
-            try:
-                item = next(result)
-            except StopIteration:
-                return
+            if items:
+                item = items[0]
+                del items[0]
+            else:
+                try:
+                    items = next(result)
+                except StopIteration:
+                    if cur_res:
+                        yield cur_res
+                    return
+                if not isinstance(items, list):
+                    items = [items]
+                item = items[0]
+                del items[0]
             line_nr += 1
-
 
     def make_live_data_generator(self, result, columns, aliases):
         assert self.outputformat in ('csv', 'json', 'python')
-
+        res = []
         if self.outputformat in ('json', 'python'):
-            yield '['
+            res.append('[')
 
         for value in self.make_live_data_generator2(result, columns, aliases):
-            yield value
+            if isinstance(value, list):
+                res.extend(value)
+            else:
+                res.append(value)
+            if len(res) > self.output.batch_size:
+                yield res
+                res = []
 
         if self.outputformat in ('json', 'python'):
-            yield ']'
+            res.append(']')
+
+        if res:
+            yield res
 
     def format_live_data(self, result, columns, aliases):
         '''
