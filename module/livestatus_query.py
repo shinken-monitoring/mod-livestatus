@@ -38,14 +38,29 @@ from livestatus_query_error import LiveStatusQueryError
 
 #############################################################################
 
-def gen_all(values):
-    for val in values:
-        yield val
 
-def gen_filtered(values, filterfunc):
+def gen_all(values, batch_size=8192):
+    res = []
+    for val in values:
+        res.append(val)
+        if len(res) > batch_size:
+            yield res
+            res = []
+    if res:
+        yield res
+
+
+def gen_filtered(values, filterfunc, batch_size=8192):
+    res = []
     for val in values:
         if filterfunc(val):
-            yield val
+            res.append(val)
+            if len(res) > batch_size:
+                yield res
+                res = []
+    if res:
+        yield res
+
 
 def gen_limit(values, maxelements):
     ''' This is a generator which returns up to <limit> elements '''
