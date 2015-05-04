@@ -69,7 +69,7 @@ def gen_filtered(values, filterfunc, batch_size=4096):
         yield out_res
 
 
-def gen_limit(values, maxelements):
+def gen_limit(values, maxelements, batch_size=4096):
     ''' This is a generator which returns up to <limit> elements '''
     loopcnt = 0
     it = iter(values)
@@ -77,19 +77,28 @@ def gen_limit(values, maxelements):
     while True:
         if loopcnt >= maxelements:
             return
-        if not cur:
-            try:
-                cur = next(it)
-            except StopIteration:
-                return
-            if not isinstance(cur, ChunkedResult):
-                cur = ChunkedResult([cur])
-            if loopcnt + len(cur) < maxelements:
-                loopcnt += len(cur)
+
+        try:
+            obj = next(it)
+        except StopIteration:
+            if cur:
                 yield cur
-                cur = []
+            return
+
+        if isinstance(obj, ChunkedResult):
+            cur.extend(obj)
+        else:
+            cur.append(obj)
+
+        cur_len = len(cur)
+        if cur_len > batch_size:
+            if cur_len + loopcnt < maxelements:
+                yield cur
+                cur = ChunkedResult()
+                loopcnt += cur_len
             else:
-                yield ChunkedResult(cur[:maxelements-loopcnt])
+                del cur[maxelements-loopcnt:]
+                yield cur
                 return
 
 
