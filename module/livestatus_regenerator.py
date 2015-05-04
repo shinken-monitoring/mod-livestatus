@@ -24,15 +24,18 @@
 
 import types
 #import time
+
 from shinken.objects import Contact
 from shinken.objects import NotificationWay
 from shinken.misc.regenerator import Regenerator
 from shinken.util import safe_print, get_obj_full_name
 from shinken.log import logger
+
 from livestatus_query_metainfo import HINT_NONE, HINT_HOST, HINT_HOSTS, HINT_SERVICES_BY_HOST, HINT_SERVICE, HINT_SERVICES_BY_HOSTS, HINT_SERVICES, HINT_HOSTS_BY_GROUP, HINT_SERVICES_BY_GROUP, HINT_SERVICES_BY_HOSTGROUP
+from .misc import ChunkedResult
 
-
-def itersorted(self, hints=None):
+def itersorted(self, hints=None, chunk_size=8192):
+    out_res = ChunkedResult()
     preselected_ids = []
     preselection = False
     if hints is not None:
@@ -101,28 +104,34 @@ def itersorted(self, hints=None):
         except Exception, exp:
             # This service is unknown
             pass
+
     if 'authuser' in hints:
         if preselection:
-            try:
-                for id in [pid for pid in preselected_ids if pid in self._id_contact_heap[hints['authuser']]]:
-                    yield self.items[id]
-            except Exception:
-                # this hints['authuser'] was not in self._id_contact_heap
-                # we do nothing, so the caller gets an empty list
-                pass
+            toloop = (pid for pid in preselected_ids if pid in self._id_contact_heap[hints['authuser']])
         else:
-            try:
-                for id in self._id_contact_heap[hints['authuser']]:
-                    yield self.items[id]
-            except Exception:
-                pass
+            toloop = self._id_contact_heap[hints['authuser']]
+        try:
+            for id in toloop:
+                out_res.append(self.items[id])
+                if len(out_res) > chunk_size:
+                    yield out_res
+                    out_res = ChunkedResult()
+        except Exception:
+            # this hints['authuser'] was not in self._id_contact_heap
+            # we do nothing, so the caller gets an empty list
+            pass
     else:
-        if preselection:
-            for id in preselected_ids:
-                yield self.items[id]
-        else:
-            for id in self._id_heap:
-                yield self.items[id]
+        if not preselection:
+            preselected_ids = self._id_heap
+        for id in preselected_ids:
+            out_res.append(self.items[id])
+            if len(out_res) > chunk_size:
+                yield out_res
+                out_res = ChunkedResult()
+
+    if out_res:
+        yield out_res
+
 
 
 class LiveStatusRegenerator(Regenerator):

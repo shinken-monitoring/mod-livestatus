@@ -491,6 +491,14 @@ class LiveStatusQuery(object):
         def factory(obj, attribute, groupobj):
             setattr(obj, attribute, groupobj)
 
+        res = []
+        for obj in objs:
+            if isinstance(obj, ChunkedResult):
+                res.extend(obj)
+            else:
+                res.append(obj)
+        objs = res
+
         return sorted((
             factory(og[0], groupattr2, og[1]) or og[0] for og in ( # host, attr, hostgroup or host
                 (copy.copy(inner_list0[0]), item0) for inner_list0 in ( # host', hostgroup
@@ -511,14 +519,20 @@ class LiveStatusQuery(object):
         # We will create a problems list first with all problems and source in it
         # TODO: create with filter
         problems = []
-        for h in self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints):
-            if h.is_problem:
-                pb = Problem(h, h.impacts)
-                problems.append(pb)
-        for s in self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints):
-            if s.is_problem:
-                pb = Problem(s, s.impacts)
-                problems.append(pb)
+        for chunk_or_host in self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints):
+            if not isinstance(chunk_or_host, ChunkedResult):
+                chunk_or_host = [chunk_or_host]
+            for h in chunk_or_host:
+                if h.is_problem:
+                    pb = Problem(h, h.impacts)
+                    problems.append(pb)
+        for chunk_or_service in self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints):
+            if not isinstance(chunk_or_service, ChunkedResult):
+                chunk_or_service = [chunk_or_service]
+            for s in chunk_or_service:
+                if s.is_problem:
+                    pb = Problem(s, s.impacts)
+                    problems.append(pb)
         # Then return
         return problems
 
