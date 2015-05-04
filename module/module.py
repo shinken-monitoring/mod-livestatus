@@ -551,8 +551,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 self.modules_manager.set_to_restart(mod)
                     time.sleep(1)
                 except Queue.Empty:
-                    pass
-                    #self.livestatus.counters.calc_rate()
+                    self.livestatus.counters.calc_rate()
                 except IOError, e:
                     if hasattr(os, 'errno') and e.errno != os.errno.EINTR:
                         raise
