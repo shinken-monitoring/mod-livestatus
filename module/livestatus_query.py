@@ -39,17 +39,6 @@ from livestatus_query_error import LiveStatusQueryError
 #############################################################################
 
 
-def gen_all(values, batch_size=8192):
-    res = []
-    for val in values:
-        res.append(val)
-        if len(res) > batch_size:
-            yield res
-            res = []
-    if res:
-        yield res
-
-
 def gen_filtered(values, filterfunc, batch_size=8192):
     res = []
     for val in values:
@@ -85,12 +74,6 @@ def gen_limit(values, maxelements):
                 yield cur[:maxelements-loopcnt]
                 return
 
-# This is a generator which returns up to <limit> elements
-# which passed the filter. If the limit has been reached
-# it is no longer necessary to loop through the original list.
-def gen_limit_filtered(values, maxelements, filterfunc):
-    for val in gen_limit(gen_filtered(values, filterfunc), maxelements):
-        yield val
 
 #############################################################################
 
