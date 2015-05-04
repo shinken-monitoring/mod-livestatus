@@ -507,7 +507,6 @@ class LiveStatus_broker(BaseModule, Daemon):
             for name in 'query', 'response', 'data':
                 try:                exec 'del %s' % name
                 except NameError:   pass
-            gc.collect()
 
     # It's the thread function that will get broks
     # and update data. Will lock the whole thing
