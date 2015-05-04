@@ -548,7 +548,6 @@ class LiveStatus_broker(BaseModule, Daemon):
                                 logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                                 logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                                 self.modules_manager.set_to_restart(mod)
-                    time.sleep(1)
                 except Queue.Empty:
                     self.livestatus.counters.calc_rate()
                 except IOError, e:
