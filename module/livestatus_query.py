@@ -446,6 +446,13 @@ class LiveStatusQuery(object):
 
     def get_filtered_livedata(self, cs):
         items = getattr(self.datamgr.rg, self.table).__itersorted__(self.metainfo.query_hints)
+        res = []
+        for obj in items:
+            if isinstance(obj, ChunkedResult):
+                res.extend(obj)
+            else:
+                res.append(obj)
+        items = res
         if cs.without_filter:
             return [x for x in items]
         else:
@@ -572,13 +579,20 @@ class LiveStatusQuery(object):
 
     def get_servicesbyhostgroup_livedata(self, cs):
         objs = self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints)
-        return sorted([x for x in (
-            setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
+        res = []
+        for obj in objs:
+            if isinstance(obj, ChunkedResult):
+                res.extend(obj)
+            else:
+                res.append(obj)
+        objs = res
+        return sorted(
+            ((setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0])
+            for svchgrp in (
                 (copy.copy(inner_list0[0]), item0) for inner_list0 in ( # 2 service clone and a hostgroup
                     (s, s.host.hostgroups) for s in objs if (cs.without_filter or cs.filter_func(s))  # 1 service, and it's host
                 ) for item0 in inner_list0[1] if inner_list0[1] # 2b only if the service's (from all services->filtered in the innermost loop) host has groups
-            )
-        )], key=lambda svc: svc.hostgroup.hostgroup_name)
+            )), key=lambda svc: svc.hostgroup.hostgroup_name)
 
     objects_get_handlers = {
         'hosts':                get_hosts_livedata,
