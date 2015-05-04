@@ -55,7 +55,7 @@ def gen_filtered(values, filterfunc, batch_size=8192):
             try:
                 in_res = next(values)
             except StopIteration:
-                return
+                break
             if not isinstance(in_res, ChunkedResult):
                 in_res = ChunkedResult([in_res])
             val = in_res[0]
