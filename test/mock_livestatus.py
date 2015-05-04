@@ -19,9 +19,10 @@ def mocked_livestatus_handle_request(self, request_data):
     try:
         response, keepalive = old_livestatus_handle_request(self, request_data)
         if isinstance(response, livestatus.livestatus_response.LiveStatusListResponse):
-            lists = list(response)
+            res_list = list()
+            res_list.extend(response)
             rsp_list = []
-            for sublist in lists:
+            for sublist in res_list:
                 rsp_list.extend(sublist)
             response = ''.join(rsp_list)
     except livestatus.livestatus_query_error.LiveStatusQueryError as err:
