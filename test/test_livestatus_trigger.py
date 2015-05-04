@@ -43,6 +43,8 @@ from shinken_test import time_hacker, unittest
 
 from mock_livestatus import mock_livestatus_handle_request
 
+import livestatus
+
 
 sys.setcheckinterval(10000)
 
@@ -326,7 +328,7 @@ ColumnHeaders: off
         output, keepalive = response.respond()
         cleaned = []
         for i in output:
-            if isinstance(i, list):
+            if isinstance(i, livestatus.misc.ChunkedResult):
                 cleaned.extend(i)
             else:
                 cleaned.append(i)

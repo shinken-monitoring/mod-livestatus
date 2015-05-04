@@ -24,3 +24,5 @@
 
 
 from .module import get_instance, properties
+
+from . import misc
