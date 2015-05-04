@@ -65,9 +65,20 @@ def gen_filtered(values, filterfunc, batch_size=8192):
 def gen_limit(values, maxelements):
     ''' This is a generator which returns up to <limit> elements '''
     loopcnt = 1
-    for val in values:
+    it = iter(values)
+    cur = []
+    while True:
         if loopcnt > maxelements:
             return
+        if not cur:
+            try:
+                cur = next(it)
+            except StopIteration:
+                return
+            if not isinstance(cur, list):
+                cur = [cur]
+        val = cur[0]
+        del cur[0]
         yield val
         loopcnt += 1
 
@@ -387,7 +398,13 @@ class LiveStatusQuery(object):
 
         if cacheable and not cache_hit:
             # We cannot cache generators, so we must first read them into a list
-            result = [r for r in result]
+            res = []
+            for r in result:
+                if isinstance(r, list):
+                    res.extend(r)
+                else:
+                    res.append(r)
+            result = res
             # Especially for stats requests also the columns and headers
             # are modified, so we need to save them too.
             self.query_cache.cache_query(self.metainfo, {
