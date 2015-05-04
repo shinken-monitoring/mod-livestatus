@@ -27,7 +27,9 @@ import re
 import time
 import copy
 
+
 from shinken.log import logger
+
 from mapping import table_class_map, find_filter_converter, list_livestatus_attributes, Problem
 from livestatus_response import LiveStatusResponse
 from livestatus_stack import LiveStatusStack
@@ -36,26 +38,42 @@ from livestatus_query_metainfo import LiveStatusQueryMetainfo
 from livestatus_response import Separators
 from livestatus_query_error import LiveStatusQueryError
 
+from .misc import ChunkedResult
+
 #############################################################################
 
 
 def gen_filtered(values, filterfunc, batch_size=8192):
-    res = []
-    for val in values:
+    in_res = ChunkedResult()
+    out_res = ChunkedResult()
+    values = iter(values)
+    while True:
+        if in_res:
+            val = in_res[0]
+            del in_res[0]
+        else:
+            try:
+                in_res = next(values)
+            except StopIteration:
+                return
+            if not isinstance(in_res, ChunkedResult):
+                in_res = ChunkedResult([in_res])
+            val = in_res[0]
+            del in_res[0]
         if filterfunc(val):
-            res.append(val)
-            if len(res) > batch_size:
-                yield res
-                res = []
-    if res:
-        yield res
+            out_res.append(val)
+            if len(out_res) > batch_size:
+                yield out_res
+                out_res = ChunkedResult()
+    if out_res:
+        yield out_res
 
 
 def gen_limit(values, maxelements):
     ''' This is a generator which returns up to <limit> elements '''
     loopcnt = 0
     it = iter(values)
-    cur = []
+    cur = ChunkedResult()
     while True:
         if loopcnt >= maxelements:
             return
@@ -64,14 +82,14 @@ def gen_limit(values, maxelements):
                 cur = next(it)
             except StopIteration:
                 return
-            if not isinstance(cur, list):
-                cur = [cur]
+            if not isinstance(cur, ChunkedResult):
+                cur = ChunkedResult([cur])
             if loopcnt + len(cur) < maxelements:
                 loopcnt += len(cur)
                 yield cur
                 cur = []
             else:
-                yield cur[:maxelements-loopcnt]
+                yield ChunkedResult(cur[:maxelements-loopcnt])
                 return
 
 
@@ -386,7 +404,7 @@ class LiveStatusQuery(object):
             # We cannot cache generators, so we must first read them into a list
             res = []
             for r in result:
-                if isinstance(r, list):
+                if isinstance(r, ChunkedResult):
                     res.extend(r)
                 else:
                     res.append(r)
@@ -628,11 +646,11 @@ class LiveStatusQuery(object):
         return output
 
     def _get_live_data_log(self, cs):
-        res = []
+        res = ChunkedResult()
         for x in self.db.get_live_data_log():
             if len(res) > self.response.output.batch_size:
                 yield res
-                res = []
+                res = ChunkedResult()
             z = x.fill(self.datamgr)
             if cs.without_filter or cs.filter_func(z):
                 res.append(z)
@@ -698,7 +716,7 @@ class LiveStatusQuery(object):
             # It is a dict with the statsgroupyby: as key
             groupedresult = {}
             for elem in filtresult:
-                if isinstance(elem, list):
+                if isinstance(elem, ChunkedResult):
                     lelem = elem
                 else:
                     lelem = [elem]
@@ -717,7 +735,7 @@ class LiveStatusQuery(object):
         # and put the results in a list.
         res = []
         for chunk_or_item in filtresult:
-            if isinstance(chunk_or_item, list):
+            if isinstance(chunk_or_item, ChunkedResult):
                 res.extend(chunk_or_item)
             else:
                 res.append(chunk_or_item)

@@ -49,6 +49,8 @@ except ImportError:
 from shinken.log import logger
 from livestatus_query_error import LiveStatusQueryError
 
+from .misc import ChunkedResult
+
 #############################################################################
 
 Separators = namedtuple('Separators',
@@ -64,16 +66,16 @@ class LiveStatusListResponse(list):
     def __iter__(self):
         '''Iter over the values and eventual sub-values. This so also
 recursively iter of the values of eventual sub-LiveStatusListResponse. '''
-        res = []
+        res = ChunkedResult()
         for values in super(LiveStatusListResponse, self).__iter__():
             if len(res) > self.batch_size:
                 yield res
-                res = []
+                res = ChunkedResult()
             if isinstance(values, str):
                 res.append(values)
             else:
                 for value in values:
-                    if isinstance(value, (list, LiveStatusListResponse, GeneratorType)):
+                    if isinstance(value, (ChunkedResult, LiveStatusListResponse, GeneratorType)):
                         res.extend(value)
                     else:
                         res.append(value)
@@ -92,7 +94,7 @@ generator value at its index in this list.
             value = self[idx]
             if isinstance(value, LiveStatusListResponse):
                 tot += value.total_len()
-            elif isinstance(value, (GeneratorType, list)):
+            elif isinstance(value, (GeneratorType, ChunkedResult)):
                 newlist = LiveStatusListResponse()
                 newlist.extend(value)
                 #for generated_data in value:
@@ -218,7 +220,7 @@ class LiveStatusResponse:
     def make_live_data_generator2(self, result, columns, aliases):
         assert self.outputformat in self._format_2_value_handler
 
-        cur_res = []
+        cur_res = ChunkedResult()
 
         if not isinstance(result, GeneratorType):
             result = iter(result)
@@ -242,8 +244,8 @@ class LiveStatusResponse:
         except StopIteration:
             has_no_item = True
         else:
-            if not isinstance(items, list):
-                items = [items]
+            if not isinstance(items, ChunkedResult):
+                items = ChunkedResult([items])
             item = items[0]
             del items[0]
 
@@ -290,7 +292,7 @@ class LiveStatusResponse:
             cur_res.append( row_handler(self, l, line_nr) )
             if len(cur_res) > self.output.batch_size:
                 yield cur_res
-                cur_res = []
+                cur_res = ChunkedResult()
 
             if items:
                 item = items[0]
@@ -302,26 +304,26 @@ class LiveStatusResponse:
                     if cur_res:
                         yield cur_res
                     return
-                if not isinstance(items, list):
-                    items = [items]
+                if not isinstance(items, ChunkedResult):
+                    items = ChunkedResult([items])
                 item = items[0]
                 del items[0]
             line_nr += 1
 
     def make_live_data_generator(self, result, columns, aliases):
         assert self.outputformat in ('csv', 'json', 'python')
-        res = []
+        res = ChunkedResult()
         if self.outputformat in ('json', 'python'):
             res.append('[')
 
         for value in self.make_live_data_generator2(result, columns, aliases):
-            if isinstance(value, list):
+            if isinstance(value, ChunkedResult):
                 res.extend(value)
             else:
                 res.append(value)
             if len(res) > self.output.batch_size:
                 yield res
-                res = []
+                res = ChunkedResult()
 
         if self.outputformat in ('json', 'python'):
             res.append(']')

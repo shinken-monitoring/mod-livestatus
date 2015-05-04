@@ -10,12 +10,14 @@ import select
 import copy
 import traceback
 
+
 from shinken.log import logger
 
 from .livestatus_obj import LiveStatus
 from .livestatus_response import LiveStatusListResponse
 from .livestatus_query_error import LiveStatusQueryError
 from .livestatus_response import LiveStatusResponse
+from .misc import ChunkedResult
 
 #############################################################################
 
@@ -204,9 +206,11 @@ class LiveStatusClientThread(threading.Thread):
 
     def send_response(self, response):
         if not isinstance(response, LiveStatusListResponse):
-            response = [[response]]
-        for bulk in response:
-            for data in bulk:
+            response = [response]
+        for bulk_or_data in response:
+            if not isinstance(bulk_or_data, ChunkedResult):
+                bulk_or_data = [bulk_or_data]
+            for data in bulk_or_data:
                 self._send_data(data)
 
     def request_stop(self):
