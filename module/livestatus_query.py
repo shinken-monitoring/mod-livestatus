@@ -726,6 +726,17 @@ class LiveStatusQuery(object):
                 # All possible combinations of stats_group_by values. group is a tuple
                 resultdict[group] = dict(zip(self.stats_group_by, group))
 
+        # filtresult can be a generator
+        # in such case we have absolutely to consume it
+        # and put the results in a list.
+        res = []
+        for chunk_or_item in filtresult:
+            if isinstance(chunk_or_item, list):
+                res.extend(chunk_or_item)
+            else:
+                res.append(chunk_or_item)
+        filtresult = res
+
         # The number of Stats: statements
         # For each statement there is one function on the stack
         maxidx = self.stats_filter_stack.qsize()
@@ -743,13 +754,7 @@ class LiveStatusQuery(object):
                 for group in groupedresult:
                     resultdict[group][stats_number] = postprocess(filter(filtfunc, groupedresult[group]))
             else:
-                res = []
-                for chunk_or_item in filtresult:
-                    if isinstance(chunk_or_item, list):
-                        res.extend(chunk_or_item)
-                    else:
-                        res.append(chunk_or_item)
-                resultdict[stats_number] = postprocess(filter(filtfunc, res))
+                resultdict[stats_number] = postprocess(filter(filtfunc, filtresult))
 
         if self.stats_group_by:
             for group in resultdict:
