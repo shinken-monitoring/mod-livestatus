@@ -726,13 +726,14 @@ class LiveStatusQuery(object):
                 for group in groupedresult:
                     resultdict[group][stats_number] = postprocess(filter(filtfunc, groupedresult[group]))
             else:
-                # Calc statistics over _all_ elements of filtresult
-                if isinstance(filtresult, list):
-                    resultdict[stats_number] = postprocess(filter(filtfunc, filtresult))
-                else:
-                    # it's a generator
-                    filtresult = list(filtresult)
-                    resultdict[stats_number] = postprocess(filter(filtfunc, filtresult))
+                res = []
+                for chunk_or_item in filtresult:
+                    if isinstance(chunk_or_item, list):
+                        res.extend(chunk_or_item)
+                    else:
+                        res.append(chunk_or_item)
+                resultdict[stats_number] = postprocess(filter(filtfunc, res))
+
         if self.stats_group_by:
             for group in resultdict:
                 result.append(resultdict[group])
