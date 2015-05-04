@@ -1948,9 +1948,9 @@ ResponseHeader: fixed16
         # inside notification_period, outside check_period
         time.sleep(5)
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        self.assert_(response == """200          16
+        self.assertEqual("""200          16
 test_host_0;1;0
-""")
+""", response)
         time.sleep(60)
         # a minute later it's the other way round
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
@@ -2002,8 +2002,8 @@ OutputFormat: json
         print "good", good_response
         print "resp", response
         self.assertEqual(2, len(response) )
-        self.assert_("DISABLE_NOTIFICATIONS" in response[0])
-        self.assert_("STOP_EXECUTING_SVC_CHECKS" in response[1])
+        self.assertIn("DISABLE_NOTIFICATIONS", response[0])
+        self.assertIn("STOP_EXECUTING_SVC_CHECKS", response[1])
 
         request = """GET log
 Columns: time current_host_name current_service_description current_host_groups current_service_groups
