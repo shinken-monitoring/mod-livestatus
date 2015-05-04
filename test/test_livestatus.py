@@ -365,54 +365,58 @@ Filter: host_state != 0
         svc.act_depend_of = []  # no hostchecks on critical checkresults
         self.scheduler_loop(2, [[host, 0, 'UP'], [router, 0, 'UP'], [svc, 2, 'BAD']])
         self.update_broker(True)
-        #---------------------------------------------------------------
-        # get the full hosts table
-        #---------------------------------------------------------------
-        request = 'GET hosts'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
-        # TODO
 
-        #---------------------------------------------------------------
-        # get only the host names and addresses
-        #---------------------------------------------------------------
-        request = 'GET hosts\nColumns: name address groups\nColumnHeaders: on'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print response
-        # TODO
+        if 1:
+            #---------------------------------------------------------------
+            # get the full hosts table
+            #---------------------------------------------------------------
+            request = 'GET hosts'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print response
+            # TODO
 
-        #---------------------------------------------------------------
-        # query_1
-        #---------------------------------------------------------------
-        request = 'GET contacts'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_1_______________\n%s\n%s\n' % (request, response)
-        # TODO
+            #---------------------------------------------------------------
+            # get only the host names and addresses
+            #---------------------------------------------------------------
+            request = 'GET hosts\nColumns: name address groups\nColumnHeaders: on'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print response
+            # TODO
 
-        #---------------------------------------------------------------
-        # query_2
-        #---------------------------------------------------------------
-        request = 'GET contacts\nColumns: name alias'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_2_______________\n%s\n%s\n' % (request, response)
-        # TODO
+            #---------------------------------------------------------------
+            # query_1
+            #---------------------------------------------------------------
+            request = 'GET contacts'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print 'query_1_______________\n%s\n%s\n' % (request, response)
+            # TODO
+
+            #---------------------------------------------------------------
+            # query_2
+            #---------------------------------------------------------------
+            request = 'GET contacts\nColumns: name alias'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print 'query_2_______________\n%s\n%s\n' % (request, response)
+            # TODO
 
         #---------------------------------------------------------------
         # query_3
         #---------------------------------------------------------------
         #self.scheduler_loop(3, svc, 2, 'BAD')
-        request = 'GET services\nColumns: host_name description state\nFilter: state = 2\nColumnHeaders: on'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_3_______________\n%s\n%s\n' % (request, response)
-        self.assertEqual('host_name;description;state\ntest_host_0;test_ok_0;2\n', response )
-        request = 'GET services\nColumns: host_name description state\nFilter: state = 2'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_3_______________\n%s\n%s\n' % (request, response)
-        self.assertEqual('test_host_0;test_ok_0;2\n', response )
-        request = 'GET services\nColumns: host_name description state\nFilter: state = 0'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_3_______________\n%s\n%s\n' % (request, response)
-        self.assertEqual('\n', response )
+        if 1:
+            request = 'GET services\nColumns: host_name description state\nFilter: state = 2\nColumnHeaders: on'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print 'query_3_______________\n%s\n%s\n' % (request, response)
+            self.assertEqual('host_name;description;state\ntest_host_0;test_ok_0;2\n', response )
+            request = 'GET services\nColumns: host_name description state\nFilter: state = 2'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print 'query_3_______________\n%s\n%s\n' % (request, response)
+            self.assertEqual('test_host_0;test_ok_0;2\n', response )
+        if 1:
+            request = 'GET services\nColumns: host_name description state\nFilter: state = 0'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print 'query_3_______________\n%s\n%s\n' % (request, response)
+            self.assertEqual('\n', response )
         duration = 180
         now = time.time()
         cmd = "[%lu] SCHEDULE_SVC_DOWNTIME;test_host_0;test_ok_0;%d;%d;0;0;%d;lausser;blablub" % (now, now, now + duration, duration)
@@ -422,18 +426,19 @@ Filter: host_state != 0
         self.update_broker(True)
         self.scheduler_loop(3, [[svc, 2, 'BAD']])
         self.update_broker(True)
-        request = 'GET services\nColumns: host_name description scheduled_downtime_depth\nFilter: state = 2\nFilter: scheduled_downtime_depth = 1'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_3_______________\n%s\n%s\n' % (request, response)
-        self.assertEqual('test_host_0;test_ok_0;1\n', response )
+        if 1:
+            request = 'GET services\nColumns: host_name description scheduled_downtime_depth\nFilter: state = 2\nFilter: scheduled_downtime_depth = 1'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print 'query_3_______________\n%s\n%s\n' % (request, response)
+            self.assertEqual('test_host_0;test_ok_0;1\n', response )
 
-        #---------------------------------------------------------------
-        # query_4
-        #---------------------------------------------------------------
-        request = 'GET services\nColumns: host_name description state\nFilter: state = 2\nFilter: in_notification_period = 1\nAnd: 2\nFilter: state = 0\nOr: 2\nFilter: host_name = test_host_0\nFilter: description = test_ok_0\nAnd: 3\nFilter: contacts >= harri\nFilter: contacts >= test_contact\nOr: 3'
-        response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
-        print 'query_4_______________\n%s\n%s\n' % (request, response)
-        self.assertEqual('test_host_0;test_ok_0;2\n', response )
+            #---------------------------------------------------------------
+            # query_4
+            #---------------------------------------------------------------
+            request = 'GET services\nColumns: host_name description state\nFilter: state = 2\nFilter: in_notification_period = 1\nAnd: 2\nFilter: state = 0\nOr: 2\nFilter: host_name = test_host_0\nFilter: description = test_ok_0\nAnd: 3\nFilter: contacts >= harri\nFilter: contacts >= test_contact\nOr: 3'
+            response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
+            print 'query_4_______________\n%s\n%s\n' % (request, response)
+            self.assertEqual('test_host_0;test_ok_0;2\n', response )
 
         #---------------------------------------------------------------
         # query_6
