@@ -109,17 +109,14 @@ def itersorted(self, hints=None, chunk_size=8192):
         if preselection:
             toloop = (pid for pid in preselected_ids if pid in self._id_contact_heap[hints['authuser']])
         else:
-            toloop = self._id_contact_heap[hints['authuser']]
-        try:
-            for id in toloop:
-                out_res.append(self.items[id])
-                if len(out_res) > chunk_size:
-                    yield out_res
-                    out_res = ChunkedResult()
-        except Exception:
-            # this hints['authuser'] was not in self._id_contact_heap
-            # we do nothing, so the caller gets an empty list
-            pass
+            toloop = self._id_contact_heap.get(hints['authuser'], ())
+
+        for id in toloop:
+            out_res.append(self.items[id])
+            if len(out_res) > chunk_size:
+                yield out_res
+                out_res = ChunkedResult()
+
     else:
         if not preselection:
             preselected_ids = self._id_heap
