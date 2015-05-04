@@ -520,13 +520,22 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.create_listeners()
         self._listening_thread.start()
 
+        t_prev = time.time()
+        count_processed = 0
+
         while not self.interrupted:
             if self.use_threads:
                 self.wait_for_no_writers()
                 self.livestatus.counters.calc_rate()
             else:
+                now = time.time()
+                if t_prev + 5 < now:
+                    logger.info("processed %s broks", count_processed)
+                    count_processed = 0
+                    t_prev = now
                 try:
                     l = self.to_q.get(True, 1)
+                    count_processed += len(l)
                     for b in l:
                         # Un-serialize the brok data
                         b.prepare()
