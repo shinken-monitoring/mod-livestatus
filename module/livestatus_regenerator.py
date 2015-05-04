@@ -34,7 +34,7 @@ from shinken.log import logger
 from livestatus_query_metainfo import HINT_NONE, HINT_HOST, HINT_HOSTS, HINT_SERVICES_BY_HOST, HINT_SERVICE, HINT_SERVICES_BY_HOSTS, HINT_SERVICES, HINT_HOSTS_BY_GROUP, HINT_SERVICES_BY_GROUP, HINT_SERVICES_BY_HOSTGROUP
 from .misc import ChunkedResult
 
-def itersorted(self, hints=None, chunk_size=8192):
+def itersorted(self, hints=None, chunk_size=4096):
     out_res = ChunkedResult()
     preselected_ids = []
     preselection = False

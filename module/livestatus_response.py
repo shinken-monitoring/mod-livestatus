@@ -60,7 +60,7 @@ Separators = namedtuple('Separators',
 class LiveStatusListResponse(list):
     ''' A class to be able to recognize list of data/bytes to be sent vs plain data/bytes. '''
 
-    def __init__(self, batch_size=8192):
+    def __init__(self, batch_size=4096):
         self.batch_size = batch_size
 
     def __iter__(self):
@@ -129,7 +129,7 @@ class LiveStatusResponse:
 
     def __init__(self, responseheader='off', outputformat='csv',
                  keepalive='off', columnheaders='off', separators=separators,
-                 batch_size=8192):
+                 batch_size=4096):
         self.responseheader = responseheader
         self.outputformat = outputformat
         self.keepalive = keepalive

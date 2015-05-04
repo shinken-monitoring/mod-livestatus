@@ -43,7 +43,7 @@ from .misc import ChunkedResult
 #############################################################################
 
 
-def gen_filtered(values, filterfunc, batch_size=8192):
+def gen_filtered(values, filterfunc, batch_size=4096):
     in_res = ChunkedResult()
     out_res = ChunkedResult()
     values = iter(values)
@@ -100,7 +100,7 @@ class LiveStatusQuery(object):
     my_type = 'query'
 
     def __init__(self, datamgr, query_cache, db, pnp_path, return_queue,
-                 counters, batch_size=8192):
+                 counters, batch_size=4096):
         # Runtime data form the global LiveStatus object
         self.datamgr = datamgr
         self.query_cache = query_cache
