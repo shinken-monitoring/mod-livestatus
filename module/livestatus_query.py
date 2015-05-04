@@ -64,11 +64,11 @@ def gen_filtered(values, filterfunc, batch_size=8192):
 
 def gen_limit(values, maxelements):
     ''' This is a generator which returns up to <limit> elements '''
-    loopcnt = 1
+    loopcnt = 0
     it = iter(values)
     cur = []
     while True:
-        if loopcnt > maxelements:
+        if loopcnt >= maxelements:
             return
         if not cur:
             try:
@@ -77,10 +77,13 @@ def gen_limit(values, maxelements):
                 return
             if not isinstance(cur, list):
                 cur = [cur]
-        val = cur[0]
-        del cur[0]
-        yield val
-        loopcnt += 1
+            if loopcnt + len(cur) < maxelements:
+                loopcnt += len(cur)
+                yield cur
+                cur = []
+            else:
+                yield cur[:maxelements-loopcnt]
+                return
 
 # This is a generator which returns up to <limit> elements
 # which passed the filter. If the limit has been reached
