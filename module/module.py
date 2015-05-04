@@ -562,6 +562,7 @@ class LiveStatus_broker(BaseModule, Daemon):
                     logger.debug("[%s] Exception type: %s" % (self.name, type(exp)))
                     logger.debug("Back trace of this kill: %s" % (traceback.format_exc()))
                     raise
+                time.sleep(0.05)
 
             # Commit log broks to the database
             #self.db.commit_and_rotate_log_db()
