@@ -324,7 +324,13 @@ ColumnHeaders: off
         print response
         response.format_live_data(result, query.columns, query.aliases)
         output, keepalive = response.respond()
-        output = ''.join(output)
+        cleaned = []
+        for i in output:
+            if isinstance(i, list):
+                cleaned.extend(i)
+            else:
+                cleaned.append(i)
+        output = ''.join(cleaned)
         self.assert_(output.strip())
 
     def test_multiple_externals(self):
