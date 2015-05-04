@@ -487,10 +487,6 @@ class LiveStatusQuery(object):
         groupattr2: the attribute name to set on result.
         group_key: the key to be used to sort the group members.
         """
-
-        def factory(obj, attribute, groupobj):
-            setattr(obj, attribute, groupobj)
-
         res = []
         for obj in objs:
             if isinstance(obj, ChunkedResult):
@@ -500,7 +496,7 @@ class LiveStatusQuery(object):
         objs = res
 
         return sorted((
-            factory(og[0], groupattr2, og[1]) or og[0] for og in ( # host, attr, hostgroup or host
+            setattr(og[0], groupattr2, og[1]) or og[0] for og in ( # host, attr, hostgroup or host
                 (copy.copy(inner_list0[0]), item0) for inner_list0 in ( # host', hostgroup
                     (h, getattr(h, groupattr1)) for h in objs if (cs.without_filter or cs.filter_func(h))  # 1 host, [seine hostgroups]
                 ) for item0 in inner_list0[1] # item0 ist einzelne hostgroup
