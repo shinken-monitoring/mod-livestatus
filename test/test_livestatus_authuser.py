@@ -106,30 +106,43 @@ www2    adm(adm1,adm2,adm3) web(web1,web2) winadm(bill,steve)
         self.update_broker()
         #self.livestatus_broker.datamgr.rg.all_done_linking(1)
         print "rg is", self.livestatus_broker.datamgr.rg.hosts._id_contact_heap
-        allhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__()])
+
+        def flat_chunked(input):
+            res = []
+            for items in input:
+                res.extend(items)
+            return res
+
+        allhosts = sorted(h.get_full_name()
+                          for h in flat_chunked(self.livestatus_broker.datamgr.rg.hosts.__itersorted__()))
         print allhosts
         self.assertEqual(["dbsrv1", "dbsrv2", "dbsrv3", "dbsrv4", "dbsrv5", "www1", "www2"], allhosts )
         hint = {"target": 0, "authuser": "oradba1"}
-        orahosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__(hint)])
+        orahosts = sorted(h.get_full_name()
+                          for h in flat_chunked(self.livestatus_broker.datamgr.rg.hosts.__itersorted__(hint)))
         print orahosts
         self.assertEqual([u"dbsrv3"], orahosts )
         hint = {"target": 0, "authuser": "mydba2"}
-        myhosts = sorted([h.get_full_name() for h in self.livestatus_broker.datamgr.rg.hosts.__itersorted__(hint)])
+        myhosts = sorted(h.get_full_name()
+                         for h in flat_chunked(self.livestatus_broker.datamgr.rg.hosts.__itersorted__(hint)))
         print myhosts
         self.assertEqual(["dbsrv4", "dbsrv5"], myhosts )
         print "rg is", self.livestatus_broker.datamgr.rg.services
         print "rg is", self.livestatus_broker.datamgr.rg.services._id_contact_heap
         # unknown user
         hint = {"target": 0, "authuser": "adm0"}
-        admservices = sorted([s.get_full_name() for s in self.livestatus_broker.datamgr.rg.services.__itersorted__(hint)])
+        admservices = sorted(s.get_full_name()
+                             for s in flat_chunked(self.livestatus_broker.datamgr.rg.services.__itersorted__(hint)))
         self.assertEqual(0, len(admservices) )
         # known user which is a contact to all hosts
         hint = {"target": 0, "authuser": "adm1"}
-        admservices = sorted([s.get_full_name() for s in self.livestatus_broker.datamgr.rg.services.__itersorted__(hint)])
+        admservices = sorted(s.get_full_name()
+                             for s in flat_chunked(self.livestatus_broker.datamgr.rg.services.__itersorted__(hint)))
         self.assertEqual(15, len(admservices) ) #all services
         hint = {"target": 0, "authuser": "bill"} # bill->www2->windows
         print "rg is", self.livestatus_broker.datamgr.rg.hostgroups._id_contact_heap
-        winhosts = sorted([s.get_name() for s in self.livestatus_broker.datamgr.rg.hostgroups.__itersorted__(hint)])
+        winhosts = sorted(s.get_name()
+                          for s in flat_chunked(self.livestatus_broker.datamgr.rg.hostgroups.__itersorted__(hint)))
         print winhosts
         self.assertEqual(["windows"], winhosts )
         print "rg is", self.livestatus_broker.datamgr.rg.hostgroups
