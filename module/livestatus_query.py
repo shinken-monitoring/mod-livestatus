@@ -81,9 +81,7 @@ def gen_limit(values, maxelements, batch_size=4096):
         try:
             obj = next(it)
         except StopIteration:
-            if cur:
-                yield cur
-            return
+            break
 
         if isinstance(obj, ChunkedResult):
             cur.extend(obj)
@@ -97,9 +95,12 @@ def gen_limit(values, maxelements, batch_size=4096):
                 cur = ChunkedResult()
                 loopcnt += cur_len
             else:
-                del cur[maxelements-loopcnt:]
-                yield cur
-                return
+                break
+
+    if cur:
+        toret = min(len(cur), maxelements - loopcnt)
+        del cur[toret:]
+        yield cur
 
 
 #############################################################################
