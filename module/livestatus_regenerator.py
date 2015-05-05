@@ -34,12 +34,14 @@ from shinken.log import logger
 from livestatus_query_metainfo import HINT_NONE, HINT_HOST, HINT_HOSTS, HINT_SERVICES_BY_HOST, HINT_SERVICE, HINT_SERVICES_BY_HOSTS, HINT_SERVICES, HINT_HOSTS_BY_GROUP, HINT_SERVICES_BY_GROUP, HINT_SERVICES_BY_HOSTGROUP
 from .misc import ChunkedResult
 
+
 def itersorted(self, hints=None, chunk_size=4096):
     out_res = ChunkedResult()
     preselected_ids = []
     preselection = False
     if hints is not None:
         logger.debug("[Livestatus Regenerator] Hint is %s" % hints["target"])
+
     if hints is None:
         # return all items
         hints = {}
@@ -55,7 +57,9 @@ def itersorted(self, hints=None, chunk_size=4096):
             pass
     elif hints['target'] == HINT_HOSTS:
         try:
-            preselected_ids = [self._id_by_host_name_heap[h] for h in hints['host_name'] if h in self._id_by_host_name_heap]
+            preselected_ids = [self._id_by_host_name_heap[h]
+                               for h in hints['host_name']
+                               if h in self._id_by_host_name_heap]
             preselection = True
         except Exception, exp:
             # This host is unknown
@@ -82,14 +86,18 @@ def itersorted(self, hints=None, chunk_size=4096):
             pass
     elif hints['target'] == HINT_SERVICES:
         try:
-            preselected_ids = [self._id_by_service_name_heap[host_name + '/' + service_description] for host_name, service_description in hints['host_names_service_descriptions'] if host_name + '/' + service_description in self._id_by_service_name_heap]
+            preselected_ids = [self._id_by_service_name_heap[host_name + '/' + service_description]
+                               for host_name, service_description in hints['host_names_service_descriptions']
+                               if host_name + '/' + service_description in self._id_by_service_name_heap]
             preselection = True
         except Exception, exp:
             logger.error("[Livestatus Regenerator] Hint_services exception: %s" % exp)
             pass
     elif hints['target'] == HINT_SERVICES_BY_HOSTS:
         try:
-            preselected_ids = [id for h in hints['host_name'] if h in self._id_by_host_name_heap for id in self._id_by_host_name_heap[h]]
+            preselected_ids = [id
+                               for h in hints['host_name'] if h in self._id_by_host_name_heap
+                               for id in self._id_by_host_name_heap[h]]
             preselection = True
         except Exception:
             pass
