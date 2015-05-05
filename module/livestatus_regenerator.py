@@ -43,6 +43,9 @@ def itersorted(self, hints=None, chunk_size=4096):
     if hints is None:
         # return all items
         hints = {}
+
+    # TODO: clean all these "try: ... except Exception:" in each "elif" block,
+    # with something more .. proper and appropriate
     elif hints['target'] == HINT_HOST:
         try:
             preselected_ids = [self._id_by_host_name_heap[hints['host_name']]]
@@ -107,7 +110,8 @@ def itersorted(self, hints=None, chunk_size=4096):
 
     if 'authuser' in hints:
         if preselection:
-            toloop = (pid for pid in preselected_ids if pid in self._id_contact_heap[hints['authuser']])
+            toloop = (pid for pid in preselected_ids
+                      if pid in self._id_contact_heap.get(hints['authuser'], ()))
         else:
             toloop = self._id_contact_heap.get(hints['authuser'], ())
 
