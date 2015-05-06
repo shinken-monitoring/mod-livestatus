@@ -174,7 +174,7 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.services, '_id_contact_heap', dict())
         setattr(self.hostgroups, '_id_contact_heap', dict())
         setattr(self.servicegroups, '_id_contact_heap', dict())
-
+        
         [self.hosts._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.hosts.items.iteritems() for c in v.contacts]
         for c in self.hosts._id_contact_heap.keys():
             self.hosts._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.hosts.items[x]))
@@ -184,17 +184,32 @@ class LiveStatusRegenerator(Regenerator):
             [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() for c in v.contacts]
         else:
             # 1. every host contact automatically becomes a service contact
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() for c in v.host.contacts]
             # 2. explicit service contacts
-            [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() for c in v.contacts]
+            for (cid, c) in self.contacts.items.iteritems():
+                self.services._id_contact_heap.setdefault(get_obj_full_name(c), set())
+            
+            for (hid, h) in self.hosts.items.iteritems():
+                cnames = [get_obj_full_name(c) for c in h.contacts]
+                sids = set([s.id for s in h.services])
+                for cname in cnames:
+                    self.services._id_contact_heap[cname].update(sids)                    
+
+            # Now add services directly
+            for (sid, s) in self.services.items.iteritems():
+                cnames = [get_obj_full_name(c) for c in s.contacts]
+                for cname in cnames:
+                    self.services._id_contact_heap[cname].add(sid)
+            
+            for (cid, c) in self.contacts.items.iteritems():
+                self.services._id_contact_heap[get_obj_full_name(c)] = list(self.services._id_contact_heap[get_obj_full_name(c)])
+        
         # services without contacts inherit the host's contacts (no matter of strict or loose)
         [self.services._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.services.items.iteritems() if not v.contacts for c in v.host.contacts]
+        
         for c in self.services._id_contact_heap.keys():
-            # remove duplicates
-            self.services._id_contact_heap[c] = list(set(self.services._id_contact_heap[c]))
+            # remove duplicates is not need as we used a set
             self.services._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.services.items[x]))
-
-
+            
         if self.group_authorization_strict:
             for c in self.hosts._id_contact_heap.keys():
                 # only host contacts can be hostgroup-contacts at all
@@ -227,14 +242,17 @@ class LiveStatusRegenerator(Regenerator):
             # loose: a contact of a member becomes contact of the whole group
             [self.hostgroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.hostgroups.items.iteritems() for h in v.members for c in h.contacts]
             [self.servicegroups._id_contact_heap.setdefault(get_obj_full_name(c), []).append(k) for (k, v) in self.servicegroups.items.iteritems() for s in v.members for c in s.contacts] # todo: look at mk-livestatus. what about service's host contacts?
+
         for c in self.hostgroups._id_contact_heap.keys():
             # remove duplicates
             self.hostgroups._id_contact_heap[c] = list(set(self.hostgroups._id_contact_heap[c]))
             self.hostgroups._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.hostgroups.items[x]))
+
         for c in self.servicegroups._id_contact_heap.keys():
             # remove duplicates
             self.servicegroups._id_contact_heap[c] = list(set(self.servicegroups._id_contact_heap[c]))
             self.servicegroups._id_contact_heap[c].sort(key=lambda x: get_obj_full_name(self.servicegroups.items[x]))
+
 
         # Add another helper structure which allows direct lookup by name
         # For hosts: _id_by_host_name_heap = {'name1':id1, 'name2': id2,...}
@@ -244,7 +262,7 @@ class LiveStatusRegenerator(Regenerator):
         setattr(self.services, '_id_by_service_name_heap', dict([(get_obj_full_name(v), k) for (k, v) in self.services.items.iteritems()]))
         setattr(self.services, '_id_by_host_name_heap', dict())
         [self.services._id_by_host_name_heap.setdefault(get_obj_full_name(v.host), []).append(k) for (k, v) in self.services.items.iteritems()]
-        logger.debug("[Livestatus Regenerator] Id by Hostname heap: %s" % str(self.services._id_by_host_name_heap))
+        
         for hn in self.services._id_by_host_name_heap.keys():
             self.services._id_by_host_name_heap[hn].sort(key=lambda x: get_obj_full_name(self.services[x]))
 
@@ -275,9 +293,10 @@ class LiveStatusRegenerator(Regenerator):
         for hn in self.services._id_by_host_name_heap.keys():
             self.services._id_by_host_name_heap[hn].sort(key=lambda x: get_obj_full_name(self.services[x]))
 
-
         # Everything is new now. We should clean the cache
         self.cache.wipeout()
+
+
 
     def manage_initial_contact_status_brok(self, b):
         """overwrite it, because the original method deletes some values"""
@@ -322,6 +341,7 @@ class LiveStatusRegenerator(Regenerator):
             self.linkify_a_timeperiod(nw, 'service_notification_period')
 
         c.notificationways = new_notifways
+
 
     def register_cache(self, cache):
         self.cache = cache
