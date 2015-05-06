@@ -71,7 +71,7 @@ class TestConfigAuth(TestConfig):
 
         # NOTE: function is blocking, so must be launched in a thread
         #self.livestatus_broker.do_main()
-        self.lql_thread = threading.Thread(None, self.livestatus_broker.manage_lql_thread, 'lqlthread')
+        self.lql_thread = threading.Thread(None, self.livestatus_broker.main_thread_run, 'lqlthread')
         self.lql_thread.start()
         # wait for thread to init
         time.sleep(3)
