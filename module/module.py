@@ -55,7 +55,6 @@ import re
 import traceback
 import Queue
 import threading
-import gc
 
 #############################################################################
 
@@ -501,12 +500,6 @@ class LiveStatus_broker(BaseModule, Daemon):
 
             for sock in kick_connections:
                 del self.client_connections[sock]
-
-            # try to force release memory:
-            for name in 'query', 'response', 'data':
-                try:                exec 'del %s' % name
-                except NameError:   pass
-            gc.collect()
 
     # It's the thread function that will get broks
     # and update data. Will lock the whole thing
