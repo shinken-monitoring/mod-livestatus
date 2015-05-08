@@ -1,7 +1,7 @@
 {
   "name": "livestatus",
   "types": ["module"],
-  "version": "1.4.1",
+  "version": "1.4.2",
   "homepage": "http://github.com/shinken-monitoring/mod-livestatus",
   "author": "Jean Gabès",
   "description": "Livestatus module for Shinken",
