@@ -78,7 +78,7 @@ class TestFull_WaitQuery(TestConfig):
         self.sched.fill_initial_broks('Default-Broker')
         self.update_broker()
         # execute the livestatus by starting a dedicated thread to run the manage_lql_thread function:
-        self.lql_thread = threading.Thread(target=self.livestatus_broker.manage_lql_thread, name='lqlthread')
+        self.lql_thread = threading.Thread(target=self.livestatus_broker.main_thread_run, name='lqlthread')
         self.lql_thread.start()
         t0 = time.time()
         # give some time for the thread to init and creates its listener socket(s) :
