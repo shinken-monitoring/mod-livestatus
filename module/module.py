@@ -184,7 +184,7 @@ class LiveStatus_broker(BaseModule, Daemon):
     # will be in another process, so we will be able to hack objects
     # if need)
     def hook_pre_scheduler_mod_start(self, sched):
-        logger.info("[Livestatus Broker] pre_scheduler_mod_start::" % str(sched.__dict__))
+        logger.info("[Livestatus Broker] pre_scheduler_mod_start: %s", sched.__dict__)
         self.rg.load_from_scheduler(sched)
 
     # In a scheduler we will have a filter of what we really want as a brok
