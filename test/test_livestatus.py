@@ -1743,8 +1743,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          79
-test_host_0;test_ok_0;/shinken/pnp/index.php?host=$HOSTNAME$&srv=$SERVICEDESC$
+        self.assertRegex(response, """200          79
+test_host_0;test_ok_0;/[a-z]*/pnp/index.php\?host=\$HOSTNAME\$&srv=\$SERVICEDESC\$
 """)
 
         request = """GET services
@@ -1756,8 +1756,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          76
-test_host_0;test_ok_0;/shinken/pnp/index.php?host=test_host_0&srv=test_ok_0
+        self.assertRegex(response, """200          76
+test_host_0;test_ok_0;/[a-z]*/pnp/index.php\?host=test_host_0&srv=test_ok_0
 """)
 
         request = """GET services
@@ -1782,8 +1782,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          67
-test_host_0;test_ok_0;/shinken/wiki/doku.php/test_host_0/test_ok_0
+        self.assertRegex(response, """200          67
+test_host_0;test_ok_0;/[a-z]*/wiki/doku.php/test_host_0/test_ok_0
 """)
 
         request = """GET hosts
@@ -1794,8 +1794,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          52
-test_host_0;/shinken/pnp/index.php?host=test_host_0
+        self.assertRegex(response, """200          52
+test_host_0;/[a-z]*/pnp/index.php\?host=test_host_0
 """)
 
         request = """GET hosts
@@ -1818,8 +1818,8 @@ ResponseHeader: fixed16
 """
         response, keepalive = self.livestatus_broker.livestatus.handle_request(request)
         print response
-        self.assert_(response == """200          47
-test_host_0;/shinken/wiki/doku.php/test_host_0
+        self.assertRegex(response, """200          47
+test_host_0;/[a-z]*/wiki/doku.php/test_host_0
 """)
 
     def test_thruk_action_notes_url_icon_image_complicated(self):
