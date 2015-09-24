@@ -54,7 +54,10 @@ sys.setcheckinterval(10000)
 class LiveStatusTest(TestConfig):
     def setUp(self):
         self.setup_with_file('etc/shinken_1r_1h_1s.cfg')
-        Comment.id = 1
+        if hasattr(Comment, "_id"):
+            Comment._id = 1
+        else:
+            Comment.id = 1
         self.testid = str(os.getpid() + random.randint(1, 1000))
         self.init_livestatus()
         print "Cleaning old broks?"
@@ -830,8 +833,8 @@ OutputFormat: json
 ResponseHeader: fixed16\n"""
         response, _ = self.livestatus_broker.livestatus.handle_request(request)
         good_response = """200         115
-[["(Nagios Process)",2,0,0,"test_host_0",1,0,"test_ok_0",0,2],["lausser",1,0,0,"test_host_0",2,1,"test_ok_0",1,2]]
-"""
+[["(Nagios Process)",2,0,0,"test_host_0",%d,0,"test_ok_0",0,2],["lausser",1,0,0,"test_host_0",%d,1,"test_ok_0",1,2]]
+""" % (self.sched.comments[1].id, self.sched.comments[2].id)
         print "request", request
         print "response", response
         print "goodresp", good_response
