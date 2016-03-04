@@ -682,6 +682,10 @@ livestatus_attribute_map = {
             'function': lambda item, req: [get_livestatus_full_name(i, req) for i in item.source_problems],  # REPAIRME MAYBE (separators in python and csv)
             'datatype': list,
         },
+        'staleness': {
+            'description': 'Indicator for outdated host checks (not implemented)',
+            'function': lambda item, req: 0, # REPAIRME
+        },
         'state': {
             'description': 'The current state of the host (0: up, 1: down, 2: unreachable)',
             'function': lambda item, req: item.state_id,
@@ -1465,6 +1469,10 @@ livestatus_attribute_map = {
             'description': 'The name of the source problems (host or service)',
             'function': lambda item, req: "",  # REPAIRME
             'datatype': list,
+        },
+        'staleness': {
+            'description': 'Indicator for outdated service checks (not implemented)',
+            'function': lambda item, req: 0, # REPAIRME
         },
         'state': {
             'description': 'The current state of the service (0: OK, 1: WARN, 2: CRITICAL, 3: UNKNOWN)',
