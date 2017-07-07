@@ -366,6 +366,7 @@ class LiveStatusQuery(object):
         except Exception, e:
             import traceback
             logger.error("[Livestatus Query] Error: %s" % e)
+            logger.debug("[Livestatus Query] %s" % traceback.format_exc())
             traceback.print_exc(32)
             result = []
 
@@ -382,11 +383,19 @@ class LiveStatusQuery(object):
 
         return result
 
+    def get_table(self, table_name):
+        """
+        Returns a given table from the regenerator.
+
+        :param str table_name: The table name to retrieve
+        """
+        return self.datamgr.rg.get_table(table_name)
+
     def get_hosts_or_services_livedata(self, cs):
         # Get an iterator which will return the list of elements belonging to a specific table.
         # Depending on the hints in the query's metainfo, the list can be only a subset.
         self.metainfo.query_hints["qclass"] = self.__class__.__name__
-        items = getattr(self.datamgr.rg, self.table).__itersorted__(self.metainfo.query_hints)
+        items = self.get_table(self.table).__itersorted__(self.metainfo.query_hints)
         # Pass the elements through more generators if necessary.
         if not cs.without_filter:
             items = gen_filtered(items, cs.filter_func)
@@ -405,10 +414,10 @@ class LiveStatusQuery(object):
         return self.get_hosts_or_services_livedata(cs)
 
     def get_simple_livedata(self, cs):
-        return [obj for obj in getattr(self.datamgr.rg, self.table)]
+        return [obj for obj in self.get_table(self.table)]
 
     def get_filtered_livedata(self, cs):
-        items = getattr(self.datamgr.rg, self.table).__itersorted__(self.metainfo.query_hints)
+        items = self.get_table(self.table).__itersorted__(self.metainfo.query_hints)
         if cs.without_filter:
             return [x for x in items]
         else:
@@ -417,25 +426,17 @@ class LiveStatusQuery(object):
     def get_list_livedata(self, cs):
         t = self.table
         if cs.without_filter:
-            res = [y for y in
-                        reduce(list.__add__
-                            #, [ getattr(x, t) for x in self.datamgr.rg.services + self.datamgr.rg.hosts
-                                   # if len(getattr(x, t)) > 0 ]
-                            , [getattr(x, t) for x in self.datamgr.rg.services
-                                    if len(getattr(x, t)) > 0] +
-                             [getattr(x, t) for x in self.datamgr.rg.hosts
-                                    if len(getattr(x, t)) > 0]
-                            , [])
-            ]
+            res = [y for y in reduce(list.__add__,
+                [getattr(x, t) for x in self.get_table("services") if len(getattr(x, t)) > 0] +
+                [getattr(x, t) for x in self.get_table("hosts") if len(getattr(x, t)) > 0],
+                []
+            )]
         else:
-            res = [c for c in reduce(list.__add__
-                        , [getattr(x, t) for x in self.datamgr.rg.services
-                                if len(getattr(x, t)) > 0] +
-                         [getattr(x, t) for x in self.datamgr.rg.hosts
-                                if len(getattr(x, t)) > 0]
-                        , []
-                        )
-                    if cs.filter_func(c)]
+            res = [c for c in reduce(list.__add__ ,
+                [getattr(x, t) for x in self.get_table("services") if len(getattr(x, t)) > 0] +
+                [getattr(x, t) for x in self.get_table("hosts") if len(getattr(x, t)) > 0],
+                []
+            ) if cs.filter_func(c)]
         return res
 
     def get_group_livedata(self, cs, objs, groupattr1, groupattr2, sorter):
@@ -464,21 +465,21 @@ class LiveStatusQuery(object):
 
     def get_hostsbygroup_livedata(self, cs):
         sorter = lambda k: k.hostgroup.hostgroup_name
-        return self.get_group_livedata(cs, self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints), 'hostgroups', 'hostgroup', sorter)
+        return self.get_group_livedata(cs, self.get_table("hosts").__itersorted__(self.metainfo.query_hints), 'hostgroups', 'hostgroup', sorter)
 
     def get_servicesbygroup_livedata(self, cs):
         sorter = lambda k: k.servicegroup.servicegroup_name
-        return self.get_group_livedata(cs, self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints), 'servicegroups', 'servicegroup', sorter)
+        return self.get_group_livedata(cs, self.get_table("services").__itersorted__(self.metainfo.query_hints), 'servicegroups', 'servicegroup', sorter)
 
     def get_problem_livedata(self, cs):
         # We will create a problems list first with all problems and source in it
         # TODO: create with filter
         problems = []
-        for h in self.datamgr.rg.hosts.__itersorted__(self.metainfo.query_hints):
+        for h in self.get_table("hosts").__itersorted__(self.metainfo.query_hints):
             if h.is_problem:
                 pb = Problem(h, h.impacts)
                 problems.append(pb)
-        for s in self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints):
+        for s in self.get_table("services").__itersorted__(self.metainfo.query_hints):
             if s.is_problem:
                 pb = Problem(s, s.impacts)
                 problems.append(pb)
@@ -486,7 +487,7 @@ class LiveStatusQuery(object):
         return problems
 
     def get_status_livedata(self, cs):
-        return [c for c in self.datamgr.rg.configs.values()]
+        return [c for c in self.get_table("configs").values()]
 
     def get_columns_livedata(self, cs):
         result = []
@@ -524,7 +525,7 @@ class LiveStatusQuery(object):
         return result
 
     def get_servicesbyhostgroup_livedata(self, cs):
-        objs = self.datamgr.rg.services.__itersorted__(self.metainfo.query_hints)
+        objs = self.get_table("services").__itersorted__(self.metainfo.query_hints)
         return sorted([x for x in (
             setattr(svchgrp[0], 'hostgroup', svchgrp[1]) or svchgrp[0] for svchgrp in (
                 (copy.copy(inner_list0[0]), item0) for inner_list0 in ( # 2 service clone and a hostgroup

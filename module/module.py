@@ -127,6 +127,9 @@ class LiveStatus_broker(BaseModule, Daemon):
         self.debug = getattr(modconf, 'debug', None)
         self.debug_queries = (getattr(modconf, 'debug_queries', '0') == '1')
         self.use_query_cache = (getattr(modconf, 'query_cache', '0') == '1')
+        self.transparent_update = (
+            getattr(modconf, 'transparent_update', '0') == '1'
+        )
         if getattr(modconf, 'service_authorization', 'loose') == 'strict':
             self.service_authorization_strict = True
         else:
@@ -148,7 +151,11 @@ class LiveStatus_broker(BaseModule, Daemon):
         }
         # We need to have our regenerator now because it will need to load
         # data from scheduler before main() if in scheduler of course
-        self.rg = LiveStatusRegenerator(self.service_authorization_strict, self.group_authorization_strict)
+        self.rg = LiveStatusRegenerator(
+            self.service_authorization_strict,
+            self.group_authorization_strict,
+            self.transparent_update
+        )
 
         self.client_connections = {}  # keys will be socket of client,
         # values are LiveStatusClientThread instances
@@ -175,7 +182,9 @@ class LiveStatus_broker(BaseModule, Daemon):
         logger.info("[Livestatus Broker] Init of the Livestatus '%s'" % self.name)
         self.prepare_pnp_path()
         m = MacroResolver() # TODO: don't know/think these 2 lines are necessary..
-        m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR', 'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA', 'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
+        m.output_macros = ['HOSTOUTPUT', 'HOSTPERFDATA', 'HOSTACKAUTHOR',
+                           'HOSTACKCOMMENT', 'SERVICEOUTPUT', 'SERVICEPERFDATA',
+                           'SERVICEACKAUTHOR', 'SERVICEACKCOMMENT']
         self.rg.load_external_queue(self.from_q)
 
     # This is called only when we are in a scheduler
