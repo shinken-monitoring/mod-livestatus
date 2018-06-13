@@ -227,7 +227,7 @@ class LiveStatusClientThread(threading.Thread):
 
 
     def handle_request(self, request_data):
-        response, _ = self.livestatus.handle_request(request_data)
+        response, keepalive = self.livestatus.handle_request(request_data)
 
         try:
             if not isinstance(response, (LiveStatusListResponse, type(b''))):
@@ -243,6 +243,9 @@ class LiveStatusClientThread(threading.Thread):
                 response.responseheader = 'fixed16'
             output, _ = response.respond()
             self.send_response(output)
+
+        if keepalive != 'on':
+            self.request_stop()
 
     def run(self):
         assert isinstance(self.livestatus, LiveStatus)

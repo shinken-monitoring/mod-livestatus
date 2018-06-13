@@ -110,20 +110,23 @@ class LiveStatus(object):
             return '', False
 
         cur_idx = 0
-        keepalive = False
+        keepalive = 'off'
 
         for query in queries:  # process the command(s), if any.
             # as they are sorted alphabetically, once we get one which isn't a 'command'..
             if query.my_type != 'command':
                 break   # then we are done.
             query.process_query()
+            # According to mk_livestatus documentation
+            # COMMAND automatically implies keep alive and behave like GET when KeepAlive is set to on.
+            keepalive = 'on'
             # according to Check_Mk, COMMAND doesn't require a response (argh!),
             # that is no response or more simply: an empty response:
             output = ''
             cur_idx += 1
 
         if 'wait' in queries_type:
-            keepalive = True
+            keepalive = 'on'
             # we return  'wait' first and 'query' second..
             output = list(reversed(queries[cur_idx:]))
         elif len(queries[cur_idx:]):
