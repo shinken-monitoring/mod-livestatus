@@ -120,6 +120,7 @@ class LiveStatusResponse:
         self.separators = separators
         self.statuscode = 200
         self.output = LiveStatusListResponse()
+        self.error = None
 
     def __str__(self):
         output = "LiveStatusResponse:\n"
@@ -128,8 +129,13 @@ class LiveStatusResponse:
         return output
 
     def set_error(self, statuscode, data):
-        del self.output[:]
-        self.output.append( LiveStatusQueryError.messages[statuscode] % data )
+        msg = LiveStatusQueryError.messages[statuscode] % data
+        if self.outputformat == 'wrapped_json':
+            self.output = '[]'
+            self.error = msg
+        else:
+            del self.output[:]
+            self.output.append(msg)
         self.statuscode = statuscode
 
     def load(self, query):
@@ -143,11 +149,22 @@ class LiveStatusResponse:
                  else len(rsp) )
 
     def respond(self):
+        if self.outputformat == 'wrapped_json':
+            self._generate_wrapped_json_output()
+
         if self.responseheader == 'fixed16':
             responselength = 1 + self.get_response_len() # 1 for the final '\n'
             self.output.insert(0, '%3d %11d\n' % (self.statuscode, responselength))
         self.output.append('\n')
+
         return self.output, self.keepalive
+
+    def _generate_wrapped_json_output(self):
+        self.output = loads(reduce(lambda acc, x: acc+x, self.output))
+        self.output = {'data': self.output, 'failed': {}, 'total': len(self.output)}
+        if self.error:
+            self.output['errors']['shinken-error'] = self.error
+        self.output = LiveStatusListResponse([dumps(self.output) + '\n'])
 
     def _format_json_python_value(self, value):
         if isinstance(value, bool):
@@ -198,6 +215,7 @@ class LiveStatusResponse:
     _format_2_value_handler = {
         'csv':      (_csv_end_row, _format_csv_value),
         'json':     (_json_end_row, _format_json_python_value),
+        'wrapped_json':     (_json_end_row, _format_json_python_value),
         'python':   (_python_end_row, _format_json_python_value)
     }
     def make_live_data_generator2(self, result, columns, aliases):
@@ -270,15 +288,15 @@ class LiveStatusResponse:
 
 
     def make_live_data_generator(self, result, columns, aliases):
-        assert self.outputformat in ('csv', 'json', 'python')
+        assert self.outputformat in ('csv', 'json', 'python', 'wrapped_json')
 
-        if self.outputformat in ('json', 'python'):
+        if self.outputformat in ('json', 'python', 'wrapped_json'):
             yield '['
 
         for value in self.make_live_data_generator2(result, columns, aliases):
             yield value
 
-        if self.outputformat in ('json', 'python'):
+        if self.outputformat in ('json', 'python', 'wrapped_json'):
             yield ']'
 
     def format_live_data(self, result, columns, aliases):
