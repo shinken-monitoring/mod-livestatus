@@ -722,6 +722,8 @@ class LiveStatusQuery(object):
             converter = find_filter_converter(self.table, 'lsm_'+attribute)
             if converter:
                 reference = converter(reference)
+            if attribute == 'host_name':
+                reference = str(reference)
             if isinstance(reference, str):
                 reference = reference.decode('utf8','ignore')
         attribute = 'lsm_' + attribute
