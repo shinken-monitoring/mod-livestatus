@@ -110,6 +110,8 @@ class LiveStatus_broker(BaseModule, Daemon):
             self.host = '0.0.0.0'
         self.port = getattr(modconf, 'port', None)
         self.socket = getattr(modconf, 'socket', None)
+        self.socket_read_timeout = int(getattr(modconf, 'socket_read_timeout', 90))
+        self.socket_write_timeout = int(getattr(modconf, 'socket_read_timeout', 90))
         if self.port == 'none':
             self.port = None
         if self.port:
@@ -368,7 +370,9 @@ class LiveStatus_broker(BaseModule, Daemon):
                         full_safe_close(sock)
                         continue
 
-                new_client = self.client_connections[sock] = LiveStatusClientThread(sock, address, self)
+                new_client = self.client_connections[sock] = LiveStatusClientThread(
+                    sock, address, self,
+                    self.socket_read_timeout, self.socket_write_timeout)
                 new_client.start()
                 self.livestatus.count_event('connections')
             # end for s in inputready:

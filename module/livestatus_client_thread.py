@@ -51,7 +51,8 @@ class Error:
 class LiveStatusClientThread(threading.Thread):
     ''' A LiveStatus Client Thread will handle a full LS client connection.
     '''
-    def __init__(self, client_sock, client_address, livestatus_broker):
+    def __init__(self, client_sock, client_address, livestatus_broker,
+                 socket_read_timeout=90, socket_write_timeout=90):
         '''
         :param client_sock: The socket instance of the client.
         :param client_address:  The address of the client.
@@ -72,7 +73,8 @@ class LiveStatusClientThread(threading.Thread):
         now = time.time()
         self.start_time = now
         self.last_read = self.last_write = now
-        self.write_timeout = self.read_timeout = 90  # TODO: use parameters from somewhere..
+        self.write_timeout = socket_write_timeout
+        self.read_timeout = socket_read_timeout
         self.logger = logger
         self.last_query_time = None
         self.requests_received = 0  # number of requests received
